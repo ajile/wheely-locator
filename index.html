@@ -1,17 +1,21 @@
 <html>
 <head>
-	<meta charset="utf-8">
-	<title>Wheely test task</title>
-	<link rel="stylesheet" href="/public/stylesheet/base.css">
+    <meta charset="utf-8">
+    <title>Wheely test task</title>
+    <link rel="stylesheet" href="/public/stylesheet/base.css">
 
-	<!--
-		Секция для подгрузки файлов из сторонних CDN.
-		Такая реализация нужна для того, чтобы ускорить загрузку файлов пользователем за счет того, что запрашиваемые файлы могут уже находиться в кэше браузера пользователя, либо за счет того, что cloudflare.com имеет обширное покрытие серверами по всему миру, в случае если файл отсутствует в кэше. Также такой подход повышат отказоустойчивость за счет наличия нескольких источников.
-	-->
+    <!--
+        Секция для подгрузки файлов из сторонних CDN.
+        Такая реализация нужна для того, чтобы ускорить загрузку файлов пользователем за счет того, что запрашиваемые файлы могут уже находиться в кэше браузера пользователя, либо за счет того, что cloudflare.com имеет обширное покрытие серверами по всему миру, в случае если файл отсутствует в кэше. Также такой подход повышат отказоустойчивость за счет наличия нескольких источников.
+    -->
 
     <!-- jQuery -->
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script>window.jQuery || document.write('<script src="/public/javascript/vendor/jquery.min.js" %}" defer="defer"><\/script>')</script>
+    <script>window.jQuery || document.write('<script src="/public/javascript/vendor/jquery.min.js" %}"><\/script>')</script>
+
+    <!-- Underscore -->
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
+    <script>window._ || document.write('<script src="/public/javascript/vendor/underscore-min.js" %}"><\/script>')</script>
 
     <!-- Handlebars (need for Ember) -->
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.0.0/handlebars.min.js"></script>
@@ -20,24 +24,73 @@
     <!-- Ember -->
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/ember.js/1.7.0/ember.min.js"></script>
     <script>window.Ember || document.write('<script src="/public/javascript/vendor/ember.min.js" %}"><\/script>')</script>
+
+    <!-- Ember-data -->
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/ember-data.js/1.0.0-beta.10/ember-data.min.js"></script>
+    <script>window.Ember || document.write('<script src="/public/javascript/vendor/ember-data.min.js" %}"><\/script>')</script>
+
+    <script type="text/javascript" src="/public/javascript/lib.js"></script>
 </head>
 <body>
+    <script type="text/x-handlebars">
+        <div class="app-wrapper">
+        {{outlet}}
+        </div>
+    </script>
 
-	<script type="text/x-handlebars" data-template-name="todos">
-		<header id="header">
-			<h1>Wheels</h1>
-		</header>
-		<section id="login"></section>
-		<section id="map"></section>
-		<footer id="footer">
-			<button id="connection-switcher"></button>
-		</footer>
-	</script>
 
-	<!-- ... наше приложение подключается здесь НАЧ ... -->
-	<script type="text/javascript" src="/public/javascript/application.js"></script>
-	<script type="text/javascript" src="/public/javascript/router.js"></script>
-	<script type="text/javascript" src="/public/javascript/models/user.js"></script>
-	<!-- ... наше приложение подключается здесь КОН ... -->
+    <script type="text/x-handlebars" data-template-name="login">
+        <header id="header">
+            <h1>Авторизация</h1>
+        </header>
+
+        {{#if isAuthenticated}}
+            <section id="login">Вы авторизованы</section>
+            <footer id="footer">
+                {{#link-to 'maps'}}<button>Перейти к карте</button>{{/link-to}}
+            </footer>
+        {{else}}
+
+        <form class="form-block" {{action login on="submit"}}>
+            <section id="login">
+                {{input value=username type="text" placeholder="Username" autofocus=true}}
+                {{input value=password type="password" placeholder="Password"}}
+                {{#if errorMessage}}
+                    <div class="message message-error">{{errorMessage}}</div>
+                {{/if}}
+            </section>
+
+            <footer id="footer">
+                {{input class="btn" type="submit" value="Войти"}}
+            </footer>
+        </form>
+        {{/if}}
+    </script>
+
+    <script type="text/x-handlebars" data-template-name="maps">
+        <header id="header">
+            <h1>Карта</h1>
+        </header>
+
+        <section id="maps">
+            КАРТА ТУТ
+        </section>
+
+        <footer id="footer">
+            {{#if isAuthenticated}}
+                <button id="connection-switcher">Отключиться</button>
+            {{/if}}
+        </footer>
+    </script>
+
+    <!-- ... наше приложение подключается здесь НАЧ ... -->
+    <script type="text/javascript" src="/public/javascript/application.js"></script>
+    <script type="text/javascript" src="/public/javascript/session.js"></script>
+    <script type="text/javascript" src="/public/javascript/connection.js"></script>
+    <script type="text/javascript" src="/public/javascript/adapter.js"></script>
+    <script type="text/javascript" src="/public/javascript/router.js"></script>
+    <script type="text/javascript" src="/public/javascript/controller.js"></script>
+    <script type="text/javascript" src="/public/javascript/models/user.js"></script>
+    <!-- ... наше приложение подключается здесь КОН ... -->
 </body>
 </html>

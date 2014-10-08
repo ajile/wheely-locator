@@ -1,0 +1,43 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Wheely test task</title>
+	<link rel="stylesheet" href="/public/stylesheet/base.css">
+
+	<!--
+		Секция для подгрузки файлов из сторонних CDN.
+		Такая реализация нужна для того, чтобы ускорить загрузку файлов пользователем за счет того, что запрашиваемые файлы могут уже находиться в кэше браузера пользователя, либо за счет того, что cloudflare.com имеет обширное покрытие серверами по всему миру, в случае если файл отсутствует в кэше. Также такой подход повышат отказоустойчивость за счет наличия нескольких источников.
+	-->
+
+    <!-- jQuery -->
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/public/javascript/vendor/jquery.min.js" %}" defer="defer"><\/script>')</script>
+
+    <!-- Handlebars (need for Ember) -->
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.0.0/handlebars.min.js"></script>
+    <script>window.Handlebars || document.write('<script src="/public/javascript/vendor/handlebars.min.js" %}"><\/script>')</script>
+
+    <!-- Ember -->
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/ember.js/1.7.0/ember.min.js"></script>
+    <script>window.Ember || document.write('<script src="/public/javascript/vendor/ember.min.js" %}"><\/script>')</script>
+</head>
+<body>
+
+	<script type="text/x-handlebars" data-template-name="todos">
+		<header id="header">
+			<h1>Wheels</h1>
+		</header>
+		<section id="login"></section>
+		<section id="map"></section>
+		<footer id="footer">
+			<button id="connection-switcher"></button>
+		</footer>
+	</script>
+
+	<!-- ... наше приложение подключается здесь НАЧ ... -->
+	<script type="text/javascript" src="/public/javascript/application.js"></script>
+	<script type="text/javascript" src="/public/javascript/router.js"></script>
+	<script type="text/javascript" src="/public/javascript/models/user.js"></script>
+	<!-- ... наше приложение подключается здесь КОН ... -->
+</body>
+</html>

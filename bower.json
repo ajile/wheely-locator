@@ -1,0 +1,14 @@
+{
+  "name": "wheely",
+  "version": "0.0.0",
+  "authors": [
+    "ajile <v.v.milkov@gmail.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "ember": "~1.7.0",
+    "handlebars": "~2.0.0",
+    "jquery": "~2.1.1"
+  }
+}

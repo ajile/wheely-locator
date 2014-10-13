@@ -19,6 +19,11 @@ bower install
 grunt build
 ```
 
+Если нужна документация:
+```
+grunt jsdoc
+```
+
 Запускаем сервер:
 ```
 grunt connect

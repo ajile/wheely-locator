@@ -2,6 +2,12 @@ App.ApplicationController = Ember.Controller.extend({
 
 });
 
+/**
+ * Контроллер авторизации.
+ * @class LoginController
+ * @memberof App
+ * @todo: Заполнять поля при ресете значениями из сессии
+ */
 App.LoginController = Ember.Controller.extend({
 
     /**
@@ -29,10 +35,6 @@ App.LoginController = Ember.Controller.extend({
         // Убираем сообщение об ошибке
         this.set("errorMessage", null);
 
-        /**
-         * @type {Function} Функция обратного вызова, в нее передается
-         *                  Promise объект после попытки коннекта к серверу
-         */
         var cb = $.proxy(function(promise) {
             var s = $.proxy(this._onSuccess, this),
                 f = $.proxy(this._onError, this);

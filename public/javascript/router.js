@@ -32,6 +32,7 @@
      * сессией. Методы словаря `actions` могут быть переопределены внутри
      * контроллера, а по дефолту используются эти.
      * @mixin
+     * @memberof App
      */
     var AuthMixin = routers['AuthMixin'] = Ember.Mixin.create({
 
@@ -95,7 +96,7 @@
 
                 p.then(Ember.$.proxy(function() {
 
-                    /** @type {String} Имя роутера, куда переправить пользов. */
+                    // Имя роутера, куда переправить пользов.
                     var routerName = this.get('loginRouterName') || 'login';
 
                     // Перекидываем пользователя
@@ -111,9 +112,32 @@
     /**
      * Примесь для роутеров отвечает за проверку авторизации пользователя.
      * Если пользователь не авторизован, его перекидывает на страницу авторизации.
-     * Роутеры отвечающие за закрытые хоны приложения должны дополняться этим объектом.
+     * Роутеры отвечающие за закрытые зоны приложения должны дополняться этим объектом.
+     *
+     * Решить как лучше сделать:
+     * ```javascript
+     * var AuthOnlyMixin = function(options) {
+     *     this.beforeModel = function() {
+     *         var routerName = options.loginRouterName || 'login';
+     *         !exports.App.isAuthenticated() && this.transitionTo(routerName);
+     *     };
+     *     return this;
+     * };
+     * ```
+     * 
+     * Расширять функционал тогда можно будет так:
+     * ```javascript
+     * AuthOnlyMixin.call(BaseRoute.prototype, {loginRouterName: 'login'});
+     * ```
+     *
+     * Еще можно сделать через наследование, через проверку в методе beforeModel
+     * по типу:
+     * ```javascript
+     * if (!this.controllerFor('login').get('session'))
+     * ```
      *
      * @mixin
+     * @memberof App
      */
     var AuthorizedOnlyMixin = routers['AuthorizedOnlyMixin'] = Ember.Mixin.create({
 
@@ -139,7 +163,9 @@
      * Супер класс роутеров снабженный методами управления сессией. Слушается
      * события `login` и `logout`.
      * @class BaseRoute
-     * @namespace App
+     * @augments Ember.Route
+     * @mixes App.AuthMixin
+     * @memberof App
      */
     var BaseRoute = routers['BaseRoute'] = Ember.Route.extend(AuthMixin, {
 
@@ -149,7 +175,8 @@
          * если его нет, используется дефолтное имя `login`. Дефолтное имя
          * роутера для авторизации возможно также вытащить куда-нибудь в
          * общий конфиг.
-         * @type {String}
+         * @member {String}
+         * @defaultvalue
          */
         loginRouterName: 'login'
 
@@ -160,14 +187,17 @@
      * пользователь не авторизован его перекидывает на страницу авторизации,
      * роутер которой обозначем свойством `loginRouterName`.
      * @class AuthRoute
-     * @namespace App
+     * @augments App.BaseRoute
+     * @mixes App.AuthorizedOnlyMixin
+     * @memberof App
      */
     var AuthRoute = routers['BaseRoute'] = BaseRoute.extend(AuthorizedOnlyMixin, {});
 
     /**
      * Класс роутера, отвечающего за главную страницу
      * @class IndexRoute
-     * @namespace App
+     * @augments App.AuthRoute
+     * @memberof App
      */
     var IndexRoute = routers['IndexRoute'] = AuthRoute.extend({
 
@@ -186,14 +216,16 @@
     /**
      * Класс роутера отвечающий за прорисовку экрана с картой.
      * @class MapsRoute
-     * @namespace App
+     * @augments App.AuthRoute
+     * @memberof App
      */
     var MapsRoute = routers['MapsRoute'] = AuthRoute.extend({})
 
     /**
      * Роутер отвечающий за прорисовку экрана с формой авторизации.
      * @class LoginRoute
-     * @namespace App
+     * @augments App.BaseRoute
+     * @memberof App
      */
     var LoginRoute = routers['LoginRoute'] = BaseRoute.extend({
 

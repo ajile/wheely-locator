@@ -16,7 +16,9 @@
 
     "use strict";
 
-    // Наше приложение
+    /**
+     * @namespace App
+     */
     var App = exports.App = Ember.Application.create({
 
         /** @member {Boolean} Отвечает за вывод основных логов переходов */
@@ -38,7 +40,8 @@
         /**
          * Установка соединения через WebSocket с сервером на основании данных
          * которые размещены в объекте сессии.
-         * @method
+         * @method connect
+         * @memberof App
          * @return {Promise}
          */
         connect: function() {
@@ -57,7 +60,8 @@
 
         /**
          * Обрывание соединения с сервером.
-         * @method
+         * @method disconnect
+         * @memberof App
          * @return {Promise}
          */
         disconnect: function() {
@@ -80,7 +84,7 @@
         name: 'user',
 
         /**
-         * @constructor
+         * @method
          * @param {Ember.Container}     container   - Хранилище данных.
          * @param {Ember.Application}   application - Приложение.
          */
@@ -137,7 +141,7 @@
         after: 'user',
 
         /**
-         * @constructor
+         * @method
          * @param {Ember.Container}     container   - Хранилище данных.
          * @param {Ember.Application}   application - Приложение.
          */
@@ -214,7 +218,7 @@
         after: 'session',
 
         /**
-         * @constructor
+         * @method
          * @param {Ember.Container}     container   - Хранилище данных.
          * @param {Ember.Application}   application - Приложение.
          */
@@ -242,7 +246,7 @@
         after: 'connection',
 
         /**
-         * @constructor
+         * @method
          * @param {Ember.Container}     container   - Хранилище данных.
          * @param {Ember.Application}   application - Приложение.
          */

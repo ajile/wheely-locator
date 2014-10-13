@@ -18,11 +18,12 @@ module.exports = function(grunt) {
         // Конфиги сборщика документации
         jsdoc: {
             dist: {
-                src: ['public/**/*.js', 'README.md'], 
+                src: ['public/javascript/**/*.js'], 
                 options: {
                     destination: 'doc',
                     template: "node_modules/grunt-jsdoc/node_modules/ink-docstrap/template",
-                    configure: "node_modules/grunt-jsdoc/node_modules/ink-docstrap/template/jsdoc.conf.json"
+                    configure: "node_modules/grunt-jsdoc/node_modules/ink-docstrap/template/jsdoc.conf.json",
+                    encoding: "utf-8"
                 }
             }
         }

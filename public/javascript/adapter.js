@@ -19,8 +19,8 @@
      * Создаем класс адаптера к соединению. Данный класс агрегирует в себе
      * знания о сессии и коннекторе. Способен дать команду произвести соединение
      * с сервером используя данные, что хранятся в сессии.
-     * @class ConnectionProxy
-     * @namespace App
+     * @class ConnectionAdapter
+     * @memberof App
      */
     var ConnectionAdapter = exports.App.ConnectionAdapter = Ember.Object.extend({
 
@@ -44,11 +44,11 @@
 
             return new Promise(_.bind(function(resolve, reject) {
 
-                /** @type {Function} Соединение установлено */
+                // Соединение установлено
                 var resolve = _.bind(this.onResolve, this,
                     username, password, resolve),
 
-                    /** @type {Function} Соединение прошло с ошибкой */
+                    // Соединение прошло с ошибкой
                     reject = _.bind(this.onReject, this, reject)
 
                 // Коннектимся

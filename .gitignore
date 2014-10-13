@@ -11,6 +11,11 @@ bower_components/
 # public/
 #
 
+#
+# Директория с документацией.
+#
+doc/
+
 # Системные файлы
 .DS_Store
 

@@ -18,7 +18,7 @@
     /**
      * Класс соединения.
      * @class ConnectionProxy
-     * @namespace App
+     * @memberof App
      */
     var ConnectionProxy = exports.App.ConnectionProxy = Ember.Object.extend({
 
@@ -40,13 +40,13 @@
          */
         connect: function(username, password) {
 
-            /** @type {Object} Параметры строки запросов */
+            // Параметры строки запросов
             var data = {username: username, password: password},
 
-                /** @type {String} Строка параметров */
+                // Строка параметров
                 params = Ember.$.param(data),
 
-                /** @type {String} Собранный урл */
+                // Собранный урл
                 url = [this.get('socketURL'), '?', params].join('');
 
             return new Promise(Ember.$.proxy(function(resolve, reject) {
@@ -88,7 +88,7 @@
 
             Ember.Logger.debug("ConnectionProxy: Событие onOpen: ", args);
 
-            /** @type {Array} Список аргументов, за исключением первого */
+            // Список аргументов, за исключением первого
             var args = Array.prototype.slice.call(arguments, 1);
 
             // Вызываем callback
@@ -105,7 +105,7 @@
 
             Ember.Logger.error("ConnectionProxy: Событие onError: ", args);
 
-            /** @type {Array} Список аргументов, за исключением первого */
+            // Список аргументов, за исключением первого
             var args = Array.prototype.slice.call(arguments, 1);
 
             // Вызываем callback

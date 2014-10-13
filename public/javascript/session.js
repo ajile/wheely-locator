@@ -24,25 +24,46 @@
      * в случае обрыва, в соотв. с установкой флага авторизованности
      * `isAuthenticated`.
      * @class Session
+     * @memberof App
+     * @borrows App.User#username as username
+     * @borrows App.User#password as password
      */
     var Session = exports.App.Session = Ember.Object.extend(Ember.Evented, {
 
-        /** @member {Boolean} Флаг авторизованности */
+        /**
+         * @member {Boolean} Флаг авторизованности
+         */
         isAuthenticated: false,
 
         /**
-         * @deprecated
-         * @member {String} Свойства пользователя (для чтения)
+         * Имя
+         * @readonly
+         * @member {String} username
+         * @memberof App.Session
+         * @borrows App.User#username as username
          */
         username: Ember.computed.alias('user.username').readOnly(),
+
+        /**
+         * Пароль
+         * @readonly
+         * @member {String} password
+         * @memberof App.Session
+         * @borrows App.User#password as password
+         */
         password: Ember.computed.alias('user.password').readOnly(),
 
-        /** @member {DS.Model} Моделька пользователя */
+        /**
+         * Моделька пользователя
+         * @member {App.User} user
+         * @memberof App.Session
+         */
         user: null,
 
         /**
-         * @method
-         * @param {Add.User}     user   - Моделька пользователя.
+         * @method setUser
+         * @memberof App.Session
+         * @param {App.User}     user   - Моделька пользователя.
          */
         setUser: function(user) {
 
@@ -59,9 +80,6 @@
             return this;
         },
 
-        /**
-         * @constructor
-         */
         init: function() {
 
             // На всякий случай...
@@ -77,8 +95,9 @@
         },
 
         /**
-         * Метод авторизации.
-         * @method
+         * Метод авторизации
+         * @method authenticate
+         * @memberof App.Session
          * @param {String}     username   - Имя пользователя.
          * @param {String}     password   - Пароль пользователя.
          * @return {Session}
@@ -103,8 +122,9 @@
         },
 
         /**
-         * Метод "выхода".
-         * @method
+         * Метод "выхода"
+         * @method logout
+         * @memberof App.Session
          * @return {Session}
          */
         logout: function() {
@@ -130,7 +150,8 @@
         /**
          * Функция проверяет заполненость объекта пользователя данными
          * необходимыми для подключения.
-         * @method
+         * @method ready
+         * @memberof App.Session
          * @return {Promise}
          */
         ready: function() {

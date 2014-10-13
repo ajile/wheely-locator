@@ -1,6 +1,9 @@
 // Точка с запятой здесь нужна, чтобы не случилось батхёрта
 // у программиста, который без разбора лепит все файлы в один и
 // нечайно пропустил точку с запятой в конце.
+/**
+ * @module models/user
+ */
 ;(function(root, factory) {
 
     if (typeof define === 'function' && define.amd) {
@@ -15,7 +18,11 @@
 
     "use strict";
 
-    // Моделька пользователя
+    /**
+     * Моделька пользователя
+     * @class User
+     * @memberof App
+     */
     var User = exports.App.User = DS.Model.extend({
 
         /** @member {Object} Имя пользователя */
@@ -26,7 +33,8 @@
 
         /**
          * Перезависываем метод сохранения.
-         **/
+         * @method
+         */
         save: function() {
             // todo: ключ для пользователя
             var key = User.getKey(),
@@ -43,6 +51,14 @@
         }
     });
 
+    /**
+     * Метод возвращает ключ, под которым укладываются данные пользователя
+     * в куки.
+     * @static
+     * @function getKey
+     * @memberof App.User
+     * @return {String} Ключ под данные авторизованного пользователя.
+     */
     User.getKey = function() {
         return 'user-1';
     }

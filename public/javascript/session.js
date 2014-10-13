@@ -96,6 +96,8 @@
                 password: password
             });
 
+            this.get('user').save();
+
             // Для цепочки
             return this;
         },

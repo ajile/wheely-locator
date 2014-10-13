@@ -27,15 +27,46 @@
         /**
          * Перезависываем метод сохранения.
          **/
-        save: function() {
-            // todo: Создать соотв. тип ошибки
-            throw new Error('The user model is not committable.');
-        },
+        // save: function() {
+        //     console.log(123);
+        //     // todo: Создать соотв. тип ошибки
+        //     throw new Error('The user model is not committable.');
+        // },
 
         toStringExtension: function() {
             return [this.get('username'), this.get('password')].join(' ');
         }
     });
+
+    var UserAdapter = exports.App.UserAdapter = DS.FixtureAdapter.extend({
+        /**
+            @method createRecord
+            @param {DS.Store} store
+            @param {subclass of DS.Model} type
+            @param {DS.Model} record
+            @return {Promise} promise
+        */
+        createRecord: function(store, type, record) {
+            console.log(222);
+            var fixture = this.mockJSON(store, type, record);
+
+            this.updateFixtures(type, fixture);
+
+            return this.simulateRemoteCall(function() {
+                return fixture;
+            }, this);
+        },
+    });
+
+    var UserSerializer = exports.App.UserSerializer = DS.ActiveModelSerializer.extend({
+        extract: function() {
+            console.log(arguments)
+        }
+    });
+
+    // var Adapter = exports.App.UserAdapter = DS.Adapter.extend({
+    //     // ...your code here
+    // });
 
     return User;
 

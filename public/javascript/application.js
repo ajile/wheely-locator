@@ -86,7 +86,15 @@
          */
         initialize: function(container, application) {
 
+            // Тормозим инициализацию роутера, пока не получим
+            // информацию об авторизованном пользователе
+            App.deferReadiness();
+
             Ember.Logger.debug("Initializer: Создаем понятие пользователя.");
+
+            var Store = Ember.Object.extend({});
+
+            container.register('store:user', Store, { singleton: true });
 
             // Получить хранилище данных
             var store = container.lookup('store:main'),
@@ -95,8 +103,9 @@
                 // использован для хранения сессионных данных.
                 user = store.createRecord('user');
 
-                // user.set("username", "alen_a_arenson");
-                // user.set("password", "alen_a_arenson");
+                user.set("username", "alen_a_arenson");
+                user.set("password", "alen_a_arenson");
+
 
             // Регистрируем пользователя в приложении, чтобы его можно
             // было получить в дальнейших инициализаторах.
@@ -144,7 +153,13 @@
             });
 
             // Проверяем заполненость сессии данными
-            session.ready().then(connect);
+            session.ready().then(connect).then(function() {
+                // Разблокируем инициализацию роутера
+                App.advanceReadiness();
+            }).catch(function() {
+                // Разблокируем инициализацию роутера
+                App.advanceReadiness();
+            });
 
             // Здесь можно подписаться на событие заполнености сессии
             // session.on('furnish', connect);

@@ -5,13 +5,13 @@
 
     if (typeof define === 'function' && define.amd) {
         // Декларируем роутеры с соотв. с окружением. Начнет с AMD.
-        define(['exports', 'ember'], factory);
+        define(['exports', 'ember', 'underscore'], factory);
     } else {
         // Иначе пишем все в `root` который наверняка является объектом `window`.
-        factory(root, root.Ember);
+        factory(root, root.Ember, root._);
     }
 
-}(this, function(exports, Ember) {
+}(this, function(exports, Ember, _) {
 
     "use strict";
 

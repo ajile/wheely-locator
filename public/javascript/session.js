@@ -64,6 +64,15 @@
 
         },
 
+        authenticate: function(username, password) {
+            Ember.Logger.debug("Session: Авторизуем пользователя.");
+            this.set('isAuthenticated', true);
+            this.get('user').setProperties({
+                username: username,
+                password: password
+            });
+        },
+
         /**
          * Функция проверяет заполненость объекта пользователя данными
          * необходимыми для подключения.
@@ -85,9 +94,9 @@
          * Слушатель значений ключевых полей.
          * @method
          */
-        valueObserver: _.throttle(function() {
-            this.ready().then($.proxy(this.trigger, this, 'furnish'));
-        }, 10, {leading: false}).observes('user.username', 'user.password')
+        // valueObserver: _.throttle(function() {
+        //     this.ready().then($.proxy(this.trigger, this, 'furnish'));
+        // }, 10, {leading: false}).observes('user.username', 'user.password')
 
     });
 

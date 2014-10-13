@@ -34,14 +34,16 @@
             var c = this.get('connector');
             return new Promise(_.bind(function(resolve, reject) {
                 c.connect(username, password).then(
-                    _.bind(_.partial(this.onResolve, resolve), this),
-                    _.bind(_.partial(this.onReject, reject), this)
+                    _.bind(_.partial(this.onResolve,
+                        username, password, resolve), this),
+                    _.bind(_.partial(this.onReject,
+                        reject), this)
                 );
             }, this));
         },
 
-        onResolve: function(cb) {
-            this.get('session').set('isAuthenticated', true);
+        onResolve: function(username, password, cb) {
+            this.get('session').authenticate(username, password);
             cb();
         },
 

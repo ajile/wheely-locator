@@ -61,7 +61,14 @@
          * @return {Promise}
          */
         disconnect: function() {
-            // todo
+
+            /** @type {App.ConnectionProxy} */
+            var adapter = this.get('adapter'),
+
+                /** @type {Promise} */
+                p = adapter.disconnect();
+
+            return p;
         }
 
     });
@@ -202,6 +209,9 @@
 
         /** @member {String} Название инициалайзера */
         name: 'connection',
+
+        /** @member {String} Выполнить после создания объекта сессии */
+        after: 'session',
 
         /**
          * @constructor

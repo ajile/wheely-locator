@@ -1,6 +1,6 @@
 // Точка с запятой здесь нужна, чтобы не случилось батхёрта
 // у программиста, который без разбора лепит все файлы в один и
-// нечайно пропустил запятую в конце.
+// нечайно пропустил точку с запятой в конце.
 ;(function(root, factory) {
 
     if (typeof define === 'function' && define.amd) {
@@ -18,13 +18,22 @@
     // Перестраховка
     exports.App = exports.App || {};
 
+    var routers = {};
+
+    // Общий роутер
+    exports.App.Router.map(function() {
+        this.resource('index', {path: '/'});
+        this.resource('login', {path: '/login'});
+        this.resource('maps', {path: '/maps'});
+    });
+
     /**
      * Примесь для роутеров расширяет функционал возможностью управления
      * сессией. Методы словаря `actions` могут быть переопределены внутри
      * контроллера, а по дефолту используются эти.
      * @mixin
      */
-    var AuthMixin = exports.App.AuthMixin = Ember.Mixin.create({
+    var AuthMixin = routers['AuthMixin'] = Ember.Mixin.create({
 
         /** @member {App.ConnectionAdapter} Объект отвечающий на соединение */
         connection: Ember.computed.alias('connection'),
@@ -92,7 +101,7 @@
      *
      * @mixin
      */
-    var AuthorizedOnlyMixin = App.AuthorizedOnlyMixin = Ember.Mixin.create({
+    var AuthorizedOnlyMixin = routers['AuthorizedOnlyMixin'] = Ember.Mixin.create({
 
         /**
          * Здесь осуществляется проверка на права доступа к соотв.
@@ -112,15 +121,13 @@
 
     });
 
-    // Общий роутер
-    exports.App.Router.map(function() {
-        this.resource('index', {path: '/'});
-        this.resource('login', {path: '/login'});
-        this.resource('maps', {path: '/maps'});
-    });
-
-    // Супер класс роутера снабженный методами управления сессией.
-    var BaseRoute = exports.App.BaseRoute = Ember.Route.extend(AuthMixin, {
+    /**
+     * Супер класс роутеров снабженный методами управления сессией. Слушается
+     * события `login` и `logout`.
+     * @class BaseRoute
+     * @namespace App
+     */
+    var BaseRoute = routers['BaseRoute'] = Ember.Route.extend(AuthMixin, {
 
         /**
          * Название роутера с формой авторизации для реверсивного
@@ -134,11 +141,21 @@
 
     });
 
-    // Класс роутера отвечающий за проверку авторизации пользователя.
-    var AuthRoute = exports.App.BaseRoute = BaseRoute.extend(AuthorizedOnlyMixin, {});
+    /**
+     * Класс роутера отвечающий за проверку авторизации пользователя. Если
+     * пользователь не авторизован его перекидывает на страницу авторизации,
+     * роутер которой обозначем свойством `loginRouterName`.
+     * @class AuthRoute
+     * @namespace App
+     */
+    var AuthRoute = routers['BaseRoute'] = BaseRoute.extend(AuthorizedOnlyMixin, {});
 
-    // Роутер отвечающий за прорисовку главной страницы
-    var IndexRoute = exports.App.IndexRoute = AuthRoute.extend({
+    /**
+     * Класс роутера, отвечающего за главную страницу
+     * @class IndexRoute
+     * @namespace App
+     */
+    var IndexRoute = routers['IndexRoute'] = AuthRoute.extend({
 
         beforeModel: function() {
 
@@ -152,11 +169,19 @@
 
     });
 
-    // Роутер отвечающий за прорисовку экрана с картой.
-    var MapsRoute = exports.App.MapsRoute = AuthRoute.extend({})
+    /**
+     * Класс роутера отвечающий за прорисовку экрана с картой.
+     * @class MapsRoute
+     * @namespace App
+     */
+    var MapsRoute = routers['MapsRoute'] = AuthRoute.extend({})
 
-    // Роутер отвечающий за прорисовку экрана с формой авторизации.
-    var LoginRoute = exports.App.LoginRoute = BaseRoute.extend({
+    /**
+     * Роутер отвечающий за прорисовку экрана с формой авторизации.
+     * @class LoginRoute
+     * @namespace App
+     */
+    var LoginRoute = routers['LoginRoute'] = BaseRoute.extend({
 
         /**
          * @method
@@ -171,5 +196,9 @@
         }
 
     });
+
+    exports.App = _.extend(exports.App, routers);
+    
+    return routers;
 
 }));

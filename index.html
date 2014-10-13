@@ -13,6 +13,10 @@
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="/public/javascript/vendor/jquery.min.js" %}"><\/script>')</script>
 
+    <!-- jQuery Cookie -->
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/public/javascript/vendor/jquery.min.js" %}"><\/script>')</script>
+
     <!-- Underscore -->
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
     <script>window._ || document.write('<script src="/public/javascript/vendor/underscore-min.js" %}"><\/script>')</script>
@@ -48,6 +52,7 @@
             <section id="login">Вы авторизованы</section>
             <footer id="footer">
                 {{#link-to 'maps'}}<button>Перейти к карте</button>{{/link-to}}
+                <button {{action logout}}>Выйти</button>
             </footer>
         {{else}}
 

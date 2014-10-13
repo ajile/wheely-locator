@@ -86,9 +86,23 @@
              * @method
              */
             logout: function() {
-                this.get('connection').disconnect();
-                var routerName = this.get('loginRouterName') || 'login';
-                this.transitionTo(routerName)
+
+                /** @type {App.ConnectionAdapter} */
+                var connection = this.get('connection');
+
+                /** @type {Promise} */
+                var p = connection.disconnect();
+
+                p.then(Ember.$.proxy(function() {
+
+                    /** @type {String} Имя роутера, куда переправить пользов. */
+                    var routerName = this.get('loginRouterName') || 'login';
+
+                    // Перекидываем пользователя
+                    this.transitionTo(routerName)
+
+                }, this));
+
             }
         },
 

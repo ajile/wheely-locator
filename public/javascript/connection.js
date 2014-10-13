@@ -16,53 +16,118 @@
     "use strict";
 
     /**
-     * Создаем класс соединения.
+     * Класс соединения.
      * @class ConnectionProxy
      * @namespace App
      */
     var ConnectionProxy = exports.App.ConnectionProxy = Ember.Object.extend({
 
+        /**
+         * @todo: Вытащить в отдельный конфиг
+         * @member {App.ConnectionProxy} Урл WebSocket сервиса
+         */
         socketURL: 'ws://mini-mdt.wheely.com',
 
-        init: function() {
-        },
+        /** @member {?WebSocket} Объект сокета */
+        socket: null,
 
+        /**
+         * Установка соединения через WebSocket с сервером.
+         * @method
+         * @param {String}     username   - Имя пользователя.
+         * @param {String}     password   - Пароль пользователя.
+         * @return {Promise}
+         */
         connect: function(username, password) {
-            var socket = null,
-                data = {username: username, password: password},
+
+            /** @type {Object} Параметры строки запросов */
+            var data = {username: username, password: password},
+
+                /** @type {String} Строка параметров */
                 params = Ember.$.param(data),
+
+                /** @type {String} Собранный урл */
                 url = [this.get('socketURL'), '?', params].join('');
 
-            return new Promise($.proxy(function(resolve, reject) {
+            return new Promise(Ember.$.proxy(function(resolve, reject) {
                 Ember.Logger.debug("%cConnectionProxy: Устанавливаем соединение по WebSocket... "+url+"", 'font-weight:900;');
 
-                socket = new WebSocket(url);
+                this.socket = new WebSocket(url);
 
-                socket.onopen = _.partial($.proxy(this.onOpen, this), resolve);
-                socket.onerror = _.partial($.proxy(this.onError, reject), reject);
+                this.socket.onopen = _.partial(Ember.$.proxy(this.onOpen, this), resolve);
+                this.socket.onerror = _.partial(Ember.$.proxy(this.onError, reject), reject);
 
-                socket.onmessage = $.proxy(this.onMessage, this);
-                socket.onclose = $.proxy(this.onClose, this);
+                this.socket.onmessage = Ember.$.proxy(this.onMessage, this);
+                this.socket.onclose = Ember.$.proxy(this.onClose, this);
 
             }, this));
         },
-        
+
+        /**
+         * Закрывает соединение с сервером.
+         * @method
+         * @return {Promise}
+         */
+        disconnect: function() {
+            return new Promise(Ember.$.proxy(function(resolve, reject) {
+                if (this.socket instanceof WebSocket &&
+                    this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.close();
+                    resolve();
+                }
+            }, this));
+        },
+
+        /**
+         * Соединение прошло успешно.
+         * @param {Function}    cb          Функция обратного вызова
+         * @method
+         * @private
+         */        
         onOpen: function(cb) {
-            var args = Array.prototype.slice.call(arguments, 1);
-            cb.call(this, args);
+
             Ember.Logger.debug("ConnectionProxy: Событие onOpen: ", args);
-        },
-        
-        onError: function(cb) {
+
+            /** @type {Array} Список аргументов, за исключением первого */
             var args = Array.prototype.slice.call(arguments, 1);
+
+            // Вызываем callback
             cb.call(this, args);
-            Ember.Logger.error("ConnectionProxy: Событие onError: ", args);
         },
-        
+
+        /**
+         * Соединение прошло с ошибкой.
+         * @param {Function}    cb          Функция обратного вызова
+         * @method
+         * @private
+         */        
+        onError: function(cb) {
+
+            Ember.Logger.error("ConnectionProxy: Событие onError: ", args);
+
+            /** @type {Array} Список аргументов, за исключением первого */
+            var args = Array.prototype.slice.call(arguments, 1);
+
+            // Вызываем callback
+            cb.call(this, args);
+        },
+
+        /**
+         * Хендлер сообщений.
+         * @param {Function}    cb          Функция обратного вызова
+         * @method
+         * @private
+         */        
         onMessage: function() {
             Ember.Logger.debug("ConnectionProxy: Событие onMessage: ", arguments);
         },
-        
+
+        /**
+         * Хендлер события onClose.
+         * @param {Function}    cb          Функция обратного вызова
+         * @method
+         * @private
+         */        
         onClose: function() {
             Ember.Logger.debug("ConnectionProxy: Событие onClose: ", arguments);
         }

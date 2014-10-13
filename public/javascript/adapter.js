@@ -30,29 +30,73 @@
         /** @member {App.Session} Объект сессии */
         session: null,
 
+        /**
+         * Установка соединения с сервером.
+         * @method
+         * @param {String}     username   - Имя пользователя.
+         * @param {String}     password   - Пароль пользователя.
+         * @return {Promise}
+         */
         connect: function(username, password) {
+
+            /** @type {App.ConnectionProxy} */
             var c = this.get('connector');
+
             return new Promise(_.bind(function(resolve, reject) {
-                c.connect(username, password).then(
-                    _.bind(_.partial(this.onResolve,
-                        username, password, resolve), this),
-                    _.bind(_.partial(this.onReject,
-                        reject), this)
-                );
+
+                /** @type {Function} Соединение установлено */
+                var resolve = _.bind(this.onResolve, this,
+                    username, password, resolve),
+
+                    /** @type {Function} Соединение прошло с ошибкой */
+                    reject = _.bind(this.onReject, this, reject)
+
+                // Коннектимся
+                c.connect(username, password).then(resolve, reject);
+
             }, this));
         },
 
+        /**
+         * Отсоединиться от сервера.
+         * @method
+         * @return {Promise}
+         */
         disconnect: function() {
-            this.get('session').logout();
+
+            /** @type {App.ConnectionProxy} */
+            var c = this.get('connector'),
+
+                /** @type {Promise} */
+                r = c.disconnect();
+
+            r.then(Ember.$.proxy(function() {
+
+                this.get('session').logout();
+
+            }, this));
+
+            return r;
         },
 
+        /**
+         * Соединение прошло успешно.
+         * @param {String}      username    Имя пользователя
+         * @param {String}      password    Пароль пользователя
+         * @param {Function}    cb          Функция обратного вызова
+         * @method
+         */
         onResolve: function(username, password, cb) {
             this.get('session').authenticate(username, password);
             cb();
         },
 
+        /**
+         * Соединение прошло с ошибкой.
+         * @param {Function}    cb          Функция обратного вызова
+         * @method
+         */
         onReject: function(cb) {
-            console.log(arguments);
             // this.get('session').set('isAuthenticated', false);
             cb();
         }

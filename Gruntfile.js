@@ -9,7 +9,18 @@ module.exports = function(grunt) {
                     base: './'
                 }
             }
+        },
+
+        jsdoc : {
+            dist : {
+                src: ['public/*.js', 'test/*.js'], 
+                options: {
+                    destination: 'doc'
+                }
+            }
         }
     });
+
+    grunt.loadNpmTasks('grunt-jsdoc');
     grunt.loadNpmTasks('grunt-contrib-connect');
 }

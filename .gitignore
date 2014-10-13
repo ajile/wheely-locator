@@ -13,3 +13,6 @@ bower_components/
 
 # Системные файлы
 .DS_Store
+
+# Логи npm - зачем нам они в репе
+npm-debug.log

@@ -31,31 +31,44 @@
         session: null,
 
         /**
-         * @member {App.ConnectionProxy} Объект соединения
+         * @member {App.Session} Объект сессии
          */
-        connector: null,
+        adapter: null,
+
+        /**
+         * @constructor
+         */
+        ready: function() {
+            
+        },
 
         /**
          * Установка соединения через WebSocket с сервером на основании данных
          * которые размещены в объекте сессии.
          * @method
-         * @deprecated Структура приложения была переосмыслена, этот блок нужно
-         *             удалить. Смотри инифиализатор "connection-adapter".
-         * @todo: Вернуть обещание, которое далее обработать в контроллере
-         *        логина
          * @return {Promise}
          */
         connect: function() {
 
             /** @type {App.ConnectionProxy} */
-            var connector = this.get('connector'),
-                s = this.get('session');
+            var adapter = this.get('adapter'),
 
-            return connector.connect(s.get('username'), s.get('password'));
+                /** @type {App.Session} */
+                s = this.get('session'),
+
+                /** @type {Promise} */
+                p = adapter.connect(s.get('username'), s.get('password'));
+
+            return p;
         },
 
+        /**
+         * Обрывание соединения с сервером.
+         * @method
+         * @return {Promise}
+         */
         disconnect: function() {
-
+            // todo
         }
 
     });
@@ -82,8 +95,8 @@
                 // использован для хранения сессионных данных.
                 user = store.createRecord('user');
 
-                user.set("username", "alen_a_arenson");
-                user.set("password", "alen_a_arenson");
+                // user.set("username", "alen_a_arenson");
+                // user.set("password", "alen_a_arenson");
 
             // Регистрируем пользователя в приложении, чтобы его можно
             // было получить в дальнейших инициализаторах.
@@ -131,7 +144,7 @@
             });
 
             // Проверяем заполненость сессии данными
-            // session.ready().then(connect);
+            session.ready().then(connect);
 
             // Здесь можно подписаться на событие заполнености сессии
             // session.on('furnish', connect);

@@ -24,13 +24,14 @@
         /** @member {Object} Пароль пользователя */
         password: DS.attr('string'),
 
-        isDirty: function() {
-            return false;
-        }.property(),
+        /**
+         * Перезависываем метод сохранения.
+         **/
         save: function() {
             // todo: Создать соотв. тип ошибки
             throw new Error('The user model is not committable.');
         },
+
         toStringExtension: function() {
             return [this.get('username'), this.get('password')].join(' ');
         }

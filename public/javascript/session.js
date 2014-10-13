@@ -34,22 +34,34 @@
          * @deprecated
          * @member {String} Свойства пользователя (для чтения)
          */
-        username: Ember.computed.alias('user.username'),
-        password: Ember.computed.alias('user.password'),
+        username: Ember.computed.alias('user.username').readOnly(),
+        password: Ember.computed.alias('user.password').readOnly(),
 
         /** @member {DS.Model} Моделька пользователя */
         user: null,
 
+        /**
+         * @method
+         * @param {Add.User}     user   - Моделька пользователя.
+         */
         setUser: function(user) {
+
             // Проверяем
             if(!user instanceof exports.App.User) {
                 throw new Error("Given arg is not a User Model");
             }
+
             this.user = user;
+
             Ember.Logger.debug("Session: Задан пользователь:", user);
+
+            // Для цепочки
+            return this;
         },
 
-        /** @constructs */
+        /**
+         * @constructor
+         */
         init: function() {
 
             // На всякий случай...
@@ -64,13 +76,28 @@
 
         },
 
+        /**
+         * Метод авторизации.
+         * @method
+         * @param {String}     username   - Имя пользователя.
+         * @param {String}     password   - Пароль пользователя.
+         * @return {Session}
+         */
         authenticate: function(username, password) {
+
             Ember.Logger.debug("Session: Авторизуем пользователя.");
+
+            // Помечаем пользователя, как авторизованного
             this.set('isAuthenticated', true);
+
+            // Записываем реквизиты доступа в свойства пользователя
             this.get('user').setProperties({
                 username: username,
                 password: password
             });
+
+            // Для цепочки
+            return this;
         },
 
         /**
@@ -94,9 +121,9 @@
          * Слушатель значений ключевых полей.
          * @method
          */
-        // valueObserver: _.throttle(function() {
-        //     this.ready().then($.proxy(this.trigger, this, 'furnish'));
-        // }, 10, {leading: false}).observes('user.username', 'user.password')
+        valueObserver: _.throttle(function() {
+            this.ready().then($.proxy(this.trigger, this, 'furnish'));
+        }, 10, {leading: false}).observes('username', 'password')
 
     });
 

@@ -1,6 +1,10 @@
 module.exports = function(grunt) {
     grunt.initConfig({
+
+        // Читаем конфиги из файла проекта
         pkg: grunt.file.readJSON('package.json'),
+
+        // Переносной сервер :)
         connect: {
             server: {
                 options: {
@@ -11,11 +15,14 @@ module.exports = function(grunt) {
             }
         },
 
-        jsdoc : {
-            dist : {
-                src: ['public/*.js', 'test/*.js'], 
+        // Конфиги сборщика документации
+        jsdoc: {
+            dist: {
+                src: ['public/**/*.js', 'README.md'], 
                 options: {
-                    destination: 'doc'
+                    destination: 'doc',
+                    template: "node_modules/grunt-jsdoc/node_modules/ink-docstrap/template",
+                    configure: "node_modules/grunt-jsdoc/node_modules/ink-docstrap/template/jsdoc.conf.json"
                 }
             }
         }

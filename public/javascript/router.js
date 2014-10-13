@@ -19,42 +19,67 @@
     exports.App = exports.App || {};
 
     /**
-     * Примесь для роутеров расширяет функционал возможностью
-     * управления сессией.
-     *
-     * @todo:
-     * Решить как лучше сделать:
-     * ```javascript
-     * var AuthOnlyMixin = function(options) {
-     *     this.beforeModel = function() {
-     *         var routerName = options.loginRouterName || 'login';
-     *         !exports.App.isAuthenticated() && this.transitionTo(routerName);
-     *     };
-     *     return this;
-     * };
-     * ```
-     * 
-     * Расширять функционал тогда можно будет так:
-     * ```javascript
-     * AuthOnlyMixin.call(BaseRoute.prototype, {loginRouterName: 'login'});
-     * ```
-     *
-     * Еще можно сделать через наследование, через проверку в методе beforeModel
-     * по типу:
-     * ```javascript
-     * if (!this.controllerFor('login').get('session'))
-     * ```
-     *
+     * Примесь для роутеров расширяет функционал возможностью управления
+     * сессией. Методы словаря `actions` могут быть переопределены внутри
+     * контроллера, а по дефолту используются эти.
      * @mixin
      */
-    var LogoutMixin = App.LogoutMixin = Ember.Mixin.create({
+    var AuthMixin = exports.App.AuthMixin = Ember.Mixin.create({
 
         /** @member {App.ConnectionAdapter} Объект отвечающий на соединение */
         connection: Ember.computed.alias('connection'),
 
+        /** @member {Boolean} Авторизован ли? */
+        isAuthenticated: Ember.computed.alias('session.isAuthenticated'),
+
+        /**
+         * @method
+         */
+        setupController: function() {
+
+            this._super();
+
+            // Дополняем контроллер знаниями об авторизованности.
+            this.controller.reopen({
+
+                /** @member {Boolean} Пользователь авторизован ли? */
+                isAuthenticated: Ember.computed.alias('session.isAuthenticated'),
+
+            });
+
+        },
+
         actions: {
+
+            /**
+             * Обработчик события `login`. Устанавливает соединение с
+             * сервером, с заданными `username` и `password`, ответ типа
+             * promise отправляет в пришедшую функцию `cb`.
+             * @method
+             * @param {String}     username   - Имя пользователя.
+             * @param {String}     password   - Пароль пользователя.
+             * @param {Function}   cb         - Callback функция.
+             */
+            login: function(username, password, cb) {
+
+                /** @type {App.ConnectionAdapter} */
+                var connection = this.get('connection');
+
+                /** @type {Promise} */
+                var p = connection.connect(username, password);
+
+                cb(p);
+            },
+
+            /**
+             * Обработчик события `logout`. Обрывает соединение с сервером,
+             * и очищает данные сессии.
+             * @method
+             */
             logout: function() {
                 this.get('connection').disconnect();
+                var routerName = this.get('loginRouterName') || 'login';
+                this.transitionTo(routerName)
             }
         },
 
@@ -67,10 +92,7 @@
      *
      * @mixin
      */
-    var AuthOnlyMixin = App.AuthOnlyMixin = Ember.Mixin.create({
-
-        /** @member {Boolean} Авторизован ли? */
-        isAuthenticated: Ember.computed.alias('session.isAuthenticated'),
+    var AuthorizedOnlyMixin = App.AuthorizedOnlyMixin = Ember.Mixin.create({
 
         /**
          * Здесь осуществляется проверка на права доступа к соотв.
@@ -80,15 +102,7 @@
          */
         beforeModel: function() {
 
-            /**
-             * Название роутера с формой авторизации для реверсивного
-             * построения урла. В начале ищется в свойствах самого объекта
-             * если его нет, используется дефолтное имя `login`. Дефолтное имя
-             * роутера для авторизации возможно также вытащить куда-нибудь в
-             * общий конфиг.
-             * @type {String}
-             */
-            var routerName = this.get('loginRouterName') || 'login';
+            var routerName = this.get('loginRouterName');
 
             // Если пользователь не авторизован, перекидываем его на экран
             // с формой авторизации.
@@ -106,10 +120,22 @@
     });
 
     // Супер класс роутера снабженный методами управления сессией.
-    var BaseRoute = exports.App.BaseRoute = Ember.Route.extend(LogoutMixin, {});
+    var BaseRoute = exports.App.BaseRoute = Ember.Route.extend(AuthMixin, {
+
+        /**
+         * Название роутера с формой авторизации для реверсивного
+         * построения урла. В начале ищется в свойствах самого объекта
+         * если его нет, используется дефолтное имя `login`. Дефолтное имя
+         * роутера для авторизации возможно также вытащить куда-нибудь в
+         * общий конфиг.
+         * @type {String}
+         */
+        loginRouterName: 'login'
+
+    });
 
     // Класс роутера отвечающий за проверку авторизации пользователя.
-    var AuthRoute = exports.App.BaseRoute = BaseRoute.extend(AuthOnlyMixin, {});
+    var AuthRoute = exports.App.BaseRoute = BaseRoute.extend(AuthorizedOnlyMixin, {});
 
     // Роутер отвечающий за прорисовку главной страницы
     var IndexRoute = exports.App.IndexRoute = AuthRoute.extend({
@@ -132,7 +158,12 @@
     // Роутер отвечающий за прорисовку экрана с формой авторизации.
     var LoginRoute = exports.App.LoginRoute = BaseRoute.extend({
 
+        /**
+         * @method
+         */
         setupController: function(controller, context) {
+
+            this._super();
 
             // Очищаем контроллер - по существу очищаем форму аутентификации.
             controller.reset();

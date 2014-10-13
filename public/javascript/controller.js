@@ -4,12 +4,6 @@ App.ApplicationController = Ember.Controller.extend({
 
 App.LoginController = Ember.Controller.extend({
 
-    /** @member {Boolean} Пользователь авторизован ли? */
-    isAuthenticated: Ember.computed.alias('session.isAuthenticated'),
-
-    /** @member {App.ConnectionAdapter} Объект отвечающий на соединение */
-    connection: Ember.computed.alias('connection'),
-
     /**
      * Перезаписан стандартный метод reset инструкцией по очистке значений
      * в форме, созданной ранее.
@@ -30,19 +24,24 @@ App.LoginController = Ember.Controller.extend({
      *
      * @method login
      */
-    login: function() {
+    processForm: function() {
 
         // Убираем сообщение об ошибке
         this.set("errorMessage", null);
 
-        // Получаем коннектор
-        var connection = this.get('connection');
+        /**
+         * @type {Function} Функция обратного вызова, в нее передается
+         *                  Promise объект после попытки коннекта к серверу
+         */
+        var cb = $.proxy(function(promise) {
+            var s = $.proxy(this._onSuccess, this),
+                f = $.proxy(this._onError, this);
+            promise.then(s, f);
+        }, this);
 
-        // Коннектимся с данными username и password
-        var p = connection.connect(this.get('username'), this.get('password'));
+        // Посылаем событие "наверх", где должен происходить коннект
+        this.send('login', this.get('username'), this.get('password'), cb);
 
-        // Обрабатываем обещание
-        p.then($.proxy(this._onSuccess, this), $.proxy(this._onError, this));
     },
 
     /**

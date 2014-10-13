@@ -56,7 +56,7 @@
             </footer>
         {{else}}
 
-        <form class="form-block" {{action login on="submit"}}>
+        <form class="form-block" {{action processForm on="submit"}}>
             <section id="login">
                 {{input value=username type="text" placeholder="Username" autofocus=true}}
                 {{input value=password type="password" placeholder="Password"}}

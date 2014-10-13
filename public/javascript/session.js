@@ -102,19 +102,29 @@
             return this;
         },
 
+        /**
+         * Метод "выхода".
+         * @method
+         * @return {Session}
+         */
         logout: function() {
+
             Ember.Logger.debug("Session: Выходим.");
 
-            // Помечаем пользователя, как авторизованного
+            // Помечаем пользователя, как НЕ авторизованного
             this.set('isAuthenticated', false);
 
-            // Записываем реквизиты доступа в свойства пользователя
+            // Обнуляем реквизиты
             this.get('user').setProperties({
                 username: null,
                 password: null
             });
 
+            // Сохраняем
             this.get('user').save();
+
+            // Для цепочки
+            return this;
         },
 
         /**

@@ -4,13 +4,10 @@ App.ApplicationController = Ember.Controller.extend({
 
 App.LoginController = Ember.Controller.extend({
 
-    needs: ['session:main', 'application'],
-
     /** @member {Boolean} Пользователь авторизован ли? */
     isAuthenticated: Ember.computed.alias('session.isAuthenticated'),
 
-    session: Ember.computed.alias('session'),
-
+    /** @member {App.ConnectionAdapter} Объект отвечающий на соединение */
     connection: Ember.computed.alias('connection'),
 
     /**
@@ -26,14 +23,6 @@ App.LoginController = Ember.Controller.extend({
             password: null,
             errorMessage: null
         });
-    },
-
-    logout: function() {
-        // Получаем коннектор
-        var connection = this.get('connection');
-
-        // Отключаемся
-        var p = connection.disconnect();
     },
 
     /**

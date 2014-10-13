@@ -31,16 +31,9 @@
         session: null,
 
         /**
-         * @member {App.Session} Объект сессии
+         * @member {App.Session} Объект соединения
          */
         adapter: null,
-
-        /**
-         * @constructor
-         */
-        ready: function() {
-            
-        },
 
         /**
          * Установка соединения через WebSocket с сервером на основании данных
@@ -279,7 +272,7 @@
 
             // Даем доступ к соединению контроллерам (в частности login),
             // через адаптер
-            application.inject('router', 'connection', 'connection:adapter');
+            application.inject('route', 'connection', 'connection:adapter');
 
             application.inject('controller', 'connection', 'connection:adapter');
         }

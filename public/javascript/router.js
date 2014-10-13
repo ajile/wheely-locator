@@ -19,9 +19,8 @@
     exports.App = exports.App || {};
 
     /**
-     * Примесь для роутеров отвечает за проверку авторизации пользователя.
-     * Если пользователь не авторизован, его перекидывает на страницу авторизации.
-     * Роутеры отвечающие за закрытые хоны приложения должны дополняться этим объектом.
+     * Примесь для роутеров расширяет функционал возможностью
+     * управления сессией.
      *
      * @todo:
      * Решить как лучше сделать:
@@ -48,10 +47,27 @@
      *
      * @mixin
      */
-    var AuthOnlyMixin = App.AuthOnlyMixin = Ember.Mixin.create({
+    var LogoutMixin = App.LogoutMixin = Ember.Mixin.create({
 
-        /** @member {Array} Зависимости */
-        needs: ['session:main'],
+        /** @member {App.ConnectionAdapter} Объект отвечающий на соединение */
+        connection: Ember.computed.alias('connection'),
+
+        actions: {
+            logout: function() {
+                this.get('connection').disconnect();
+            }
+        },
+
+    });
+
+    /**
+     * Примесь для роутеров отвечает за проверку авторизации пользователя.
+     * Если пользователь не авторизован, его перекидывает на страницу авторизации.
+     * Роутеры отвечающие за закрытые хоны приложения должны дополняться этим объектом.
+     *
+     * @mixin
+     */
+    var AuthOnlyMixin = App.AuthOnlyMixin = Ember.Mixin.create({
 
         /** @member {Boolean} Авторизован ли? */
         isAuthenticated: Ember.computed.alias('session.isAuthenticated'),
@@ -89,11 +105,14 @@
         this.resource('maps', {path: '/maps'});
     });
 
-    // Супер класс роутера отвечает за проверку авторизации пользователя.
-    var BaseRoute = exports.App.BaseRoute = Ember.Route.extend(AuthOnlyMixin, {});
+    // Супер класс роутера снабженный методами управления сессией.
+    var BaseRoute = exports.App.BaseRoute = Ember.Route.extend(LogoutMixin, {});
+
+    // Класс роутера отвечающий за проверку авторизации пользователя.
+    var AuthRoute = exports.App.BaseRoute = BaseRoute.extend(AuthOnlyMixin, {});
 
     // Роутер отвечающий за прорисовку главной страницы
-    var IndexRoute = exports.App.IndexRoute = BaseRoute.extend({
+    var IndexRoute = exports.App.IndexRoute = AuthRoute.extend({
 
         beforeModel: function() {
 
@@ -108,10 +127,10 @@
     });
 
     // Роутер отвечающий за прорисовку экрана с картой.
-    var MapsRoute = exports.App.MapsRoute = BaseRoute.extend({})
+    var MapsRoute = exports.App.MapsRoute = AuthRoute.extend({})
 
     // Роутер отвечающий за прорисовку экрана с формой авторизации.
-    var LoginRoute = exports.App.LoginRoute = Ember.Route.extend({
+    var LoginRoute = exports.App.LoginRoute = BaseRoute.extend({
 
         setupController: function(controller, context) {
 

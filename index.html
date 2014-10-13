@@ -83,7 +83,7 @@
 
         <footer id="footer">
             {{#if isAuthenticated}}
-                <button id="connection-switcher">Отключиться</button>
+                <button id="connection-switcher" {{action logout}}>Отключиться</button>
             {{/if}}
         </footer>
     </script>

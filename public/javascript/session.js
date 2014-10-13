@@ -102,6 +102,21 @@
             return this;
         },
 
+        logout: function() {
+            Ember.Logger.debug("Session: Выходим.");
+
+            // Помечаем пользователя, как авторизованного
+            this.set('isAuthenticated', false);
+
+            // Записываем реквизиты доступа в свойства пользователя
+            this.get('user').setProperties({
+                username: null,
+                password: null
+            });
+
+            this.get('user').save();
+        },
+
         /**
          * Функция проверяет заполненость объекта пользователя данными
          * необходимыми для подключения.

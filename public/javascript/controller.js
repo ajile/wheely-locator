@@ -28,6 +28,14 @@ App.LoginController = Ember.Controller.extend({
         });
     },
 
+    logout: function() {
+        // Получаем коннектор
+        var connection = this.get('connection');
+
+        // Отключаемся
+        var p = connection.disconnect();
+    },
+
     /**
      * Экран авторизации.
      *

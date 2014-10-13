@@ -86,26 +86,39 @@
          */
         initialize: function(container, application) {
 
-            // Тормозим инициализацию роутера, пока не получим
-            // информацию об авторизованном пользователе
-            App.deferReadiness();
-
             Ember.Logger.debug("Initializer: Создаем понятие пользователя.");
-
-            var Store = Ember.Object.extend({});
-
-            container.register('store:user', Store, { singleton: true });
 
             // Получить хранилище данных
             var store = container.lookup('store:main'),
 
-                // Создаем пустой объект пользователя, который будет
-                // использован для хранения сессионных данных.
-                user = store.createRecord('user');
+                // Объект пользователя
+                user = null,
 
-                user.set("username", "alen_a_arenson");
-                user.set("password", "alen_a_arenson");
+                model = store.modelFor('user'),
 
+                key = model.getKey(),
+
+                // Смотрим в куках
+                rawSerializedData = $.cookie(key);
+
+
+            var createUser = function(data) {
+                data = data || {};
+                user = store.createRecord('user', data);
+                user.save();
+                return user;
+            }
+
+
+            if (rawSerializedData) {
+                try {
+                    user = createUser(JSON.parse(rawSerializedData));
+                } catch (err) {
+                    user = createUser();
+                }
+            } else {
+                user = createUser();
+            }
 
             // Регистрируем пользователя в приложении, чтобы его можно
             // было получить в дальнейших инициализаторах.
@@ -140,6 +153,10 @@
 
                 // Получить инстанс модельки пользователя, что используется в сессии
                 user = container.lookup('auth:user');
+
+            // Тормозим инициализацию роутера, пока не получим
+            // информацию об авторизованном пользователе
+            App.deferReadiness();
 
             // Передаем объект пользователя в сессию
             session.setUser(user);
@@ -244,7 +261,6 @@
 
                 });
 
-
             // Создаем экземпляр класса
             var adapter = ConnectionAdapter.create();
 
@@ -256,14 +272,16 @@
 
             });
 
-
             // Регистрируем этот класс в App с именем connector:adapter.
             application.register('connection:adapter', adapter, {
                 instantiate: false
             });
 
-            // Даем доступ к соединению контроллеру login, через адаптер
-            application.inject('controller:login', 'connection', 'connection:adapter');
+            // Даем доступ к соединению контроллерам (в частности login),
+            // через адаптер
+            application.inject('router', 'connection', 'connection:adapter');
+
+            application.inject('controller', 'connection', 'connection:adapter');
         }
     });
 

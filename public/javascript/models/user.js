@@ -27,41 +27,52 @@
         /**
          * Перезависываем метод сохранения.
          **/
-        // save: function() {
-        //     console.log(123);
-        //     // todo: Создать соотв. тип ошибки
-        //     throw new Error('The user model is not committable.');
-        // },
+        save: function() {
+            // todo: ключ для пользователя
+            var key = User.getKey(),
+                payload = JSON.stringify(this);
+
+            $.cookie(key, payload);
+
+            // todo: Создать соотв. тип ошибки
+            // throw new Error('The user model is not committable.');
+        },
 
         toStringExtension: function() {
             return [this.get('username'), this.get('password')].join(' ');
         }
     });
 
+    User.getKey = function() {
+        return 'user-1';
+    }
+
     var UserAdapter = exports.App.UserAdapter = DS.FixtureAdapter.extend({
+
         /**
-            @method createRecord
-            @param {DS.Store} store
-            @param {subclass of DS.Model} type
-            @param {DS.Model} record
-            @return {Promise} promise
-        */
-        createRecord: function(store, type, record) {
-            console.log(222);
-            var fixture = this.mockJSON(store, type, record);
+         * Unfinished
+         */
+//        find: function(store, type, id) {
+//
+//            var serializer = store.serializerFor(type.typeKey);
+//
+//            // Ключик, под которым лежат данные пользователя
+//            var key = 'user-' + parseInt(id),
+//
+//                // Смотрим в куках
+//                rawSerializedData = $.cookie(key),
+//
+//                data = null;
+//
+//            rawSerializedData = '{"id":1,"username":"asdasd","password":"aaaa"}';
+//
+//            try {
+//                return Promise.resolve(JSON.parse(rawSerializedData));
+//            } catch (err) {
+//                return Promise.reject("User by id " + id + " not found!");
+//            }
+//        },
 
-            this.updateFixtures(type, fixture);
-
-            return this.simulateRemoteCall(function() {
-                return fixture;
-            }, this);
-        },
-    });
-
-    var UserSerializer = exports.App.UserSerializer = DS.ActiveModelSerializer.extend({
-        extract: function() {
-            console.log(arguments)
-        }
     });
 
     // var Adapter = exports.App.UserAdapter = DS.Adapter.extend({

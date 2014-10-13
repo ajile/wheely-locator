@@ -42,6 +42,10 @@
             }, this));
         },
 
+        disconnect: function() {
+            this.get('session').logout();
+        },
+
         onResolve: function(username, password, cb) {
             this.get('session').authenticate(username, password);
             cb();

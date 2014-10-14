@@ -27,6 +27,12 @@
         /** @member {Boolean} "Хочу знать все о переходах!" */
         LOG_TRANSITIONS_INTERNAL: false,
 
+        /** @member {Boolean} "Хочу знать все об обращениях к вьюшкам!" */
+        LOG_VIEW_LOOKUPS: false,
+
+        /** @member {Boolean} Выводить логи авто-создаваемых объектов */
+        LOG_ACTIVE_GENERATION: false,
+
         /**
          * @member {App.Session} Объект сессии
          */
@@ -38,6 +44,99 @@
         adapter: null,
 
         /**
+         * @member {App.GeoLocator} Объект гео-локации
+         */
+        geolocator: null,
+
+        /** @member {App.CoordsCollection} Объект отвечающий на соединение */
+        coords: Ember.computed.alias('coords'),
+
+        ready: function() {
+
+            this._super.apply(this, arguments);
+
+            // Начинаем слушать события от соединения, через адаптер
+            this._observeAdapter();
+
+            // Начинаем слушать события от гео-объекта
+            this._observeGeolocator();
+        },
+
+        /**
+         * Хендлер для события `App#adapter.event:connect` от
+         * адаптера соединения
+         * @method onConnect
+         * @memberof App
+         */
+        onConnect: function() {
+
+            this.get('geolocator').reset().start();
+            
+            Ember.Logger.debug("%cApp.onConnect: Присоединились", "font-weight:900;");
+
+        },
+
+        /**
+         * Хендлер для события `App#adapter.event:disconnect` от
+         * адаптера соединения
+         * @method onDisconnect
+         * @memberof App
+         */
+        onDisconnect: function() {
+
+            this.get('geolocator').stop();
+            
+            Ember.Logger.debug("%cApp.onDisconnect: Отсоединились", "font-weight:900;");
+
+        },
+
+        /**
+         * Хендлер для события `App#geolocator.event:change` от
+         * адаптера соединения
+         * @method onConnect
+         * @memberof App
+         */
+        onPositionChange: function(geoposition, geolocator) {
+
+            Ember.Logger.debug("%cApp: Локальные координаты", "font-weight:900;", geoposition);
+
+            /** @type {App.ConnectionAdapter} */
+            var adapter = this.get('adapter');
+
+            var coords = {
+                lat: geoposition.coords.latitude,
+                lon: geoposition.coords.longitude
+            };
+
+            adapter.sendObject(coords);
+
+        },
+
+        /**
+         * Хендлер для события `App#geolocator.event:change` от
+         * адаптера соединения
+         * @method onConnect
+         * @memberof App
+         */
+        onPositionServerChange: function(data) {
+
+            Ember.Logger.debug("%cApp: Серверные координаты", "font-weight:900;", data);
+
+            // this.get('coords').set('coords', data);
+
+            // /** @type {App.ConnectionAdapter} */
+            // var adapter = this.get('adapter');
+
+            // var coords = {
+            //     lat: geoposition.coords.latitude,
+            //     lon: geoposition.coords.longitude
+            // };
+
+            // adapter.sendObject(coords);
+
+        },
+
+        /**
          * Установка соединения через WebSocket с сервером на основании данных
          * которые размещены в объекте сессии.
          * @method connect
@@ -46,14 +145,13 @@
          */
         connect: function() {
 
-            /** @type {App.ConnectionProxy} */
+            /** @type {App.ConnectionAdapter} */
             var adapter = this.get('adapter'),
 
-                /** @type {App.Session} */
-                s = this.get('session'),
-
                 /** @type {Promise} */
-                p = adapter.connect(s.get('username'), s.get('password'));
+                p = adapter.connect();
+
+            this._observeAdapter();
 
             return p;
         },
@@ -73,225 +171,110 @@
                 p = adapter.disconnect();
 
             return p;
+        },
+
+        /**
+         * Метод инициирует прослушку событий от адаптерв.
+         * @method _observeAdapter
+         * @private
+         * @memberof App
+         */
+        _observeAdapter: function() {
+
+            /** @type {App} */
+            var self = this,
+
+                /** @type {App.ConnectionAdapter} */
+                adapter = this.get('adapter'),
+
+                // Для удобства
+                p = Ember.$.proxy;
+
+            // Если мы еще не начали слушать события...
+            if (!adapter.has('connect')) {
+                // ...начинаем
+                adapter.on('connect', p(self.onConnect, self));
+            }
+
+            // Если мы еще не начали слушать события...
+            if (!adapter.has('message')) {
+                // ...начинаем
+                adapter.on('message', p(self.onPositionServerChange, self));
+            }
+
+            // Если мы еще не начали слушать события...
+            if (!adapter.has('disconnect')) {
+                // ...начинаем
+                adapter.on('disconnect', p(self.onDisconnect, self));
+            }
+        },
+
+        /**
+         * Метод инициирует прослушку событий от объекта гео-локации.
+         * @method _observeGeolocator
+         * @private
+         * @memberof App
+         */
+        _observeGeolocator: function() {
+
+            /** @type {App} */
+            var self = this,
+
+                /** @type {App.GeoLocator} */
+                geolocator = this.get('geolocator'),
+
+                p = Ember.$.proxy;
+
+            // Если мы еще не начали слушать события...
+            if (!geolocator.has('change')) {
+                // ...начинаем
+                geolocator.on('change', p(self.onPositionChange, self));
+            }
         }
 
     });
 
+    // Аспект: Пользователь
+    App.initializer(Services.UserService);
+
+    // Аспект: Сессия
+    App.initializer(Services.SessionService);
+
+    // Аспект: Соединение по WebSocket
+    App.initializer(Services.ConnectionService);
+
+    // Аспект: Обертка под соединение
+    App.initializer(Services.AdapterService);
+
+    // Аспект: Сервис геолокации
+    App.initializer(Services.GeolocatorService);
 
     App.initializer({
 
-        /** @member {String} Название инициалайзера */
-        name: 'user',
+        name: 'coords_store',
 
-        /**
-         * @method
-         * @param {Ember.Container}     container   - Хранилище данных.
-         * @param {Ember.Application}   application - Приложение.
-         */
         initialize: function(container, application) {
+            // var store = container.lookup('store:main');
+            // var localPosts = store.all('post');
+            // console.log(localPosts);
+            var CoordsCollection = exports.App.CoordsCollection = Ember.Object.extend({
 
-            Ember.Logger.debug("Initializer: Создаем понятие пользователя.");
+                store: container.lookup('store:main'),
 
-            // Получить хранилище данных
-            var store = container.lookup('store:main'),
-
-                // Объект пользователя
-                user = null,
-
-                model = store.modelFor('user'),
-
-                key = model.getKey(),
-
-                // Смотрим в куках
-                rawSerializedData = $.cookie(key);
-
-
-            var createUser = function(data) {
-                data = data || {};
-                user = store.createRecord('user', data);
-                user.save();
-                return user;
-            }
-
-
-            if (rawSerializedData) {
-                try {
-                    user = createUser(JSON.parse(rawSerializedData));
-                } catch (err) {
-                    user = createUser();
+                setCoords: function(data) {
+                    // this.get('store').unloadAll('coord');
+                    console.log(data);
                 }
-            } else {
-                user = createUser();
-            }
 
-            // Регистрируем пользователя в приложении, чтобы его можно
-            // было получить в дальнейших инициализаторах.
-            application.register('auth:user', user, {instantiate: false});
+            });
 
+            var coords = CoordsCollection.create();
+
+            application.register('coords:main', coords, {instantiate: false});
+
+            container.injection('application', 'coords', 'coords:main');
         }
     });
-
-
-    App.initializer({
-
-        /** @member {String} Название инициалайзера */
-        name: 'session',
-
-        /** @member {String} Выполнить после инициалайзера */
-        after: 'user',
-
-        /**
-         * @method
-         * @param {Ember.Container}     container   - Хранилище данных.
-         * @param {Ember.Application}   application - Приложение.
-         */
-        initialize: function(container, application) {
-
-            Ember.Logger.debug("Initializer: Создаем понятие сессии.");
-
-            // Создаем экземпляр класса
-            var session = App.Session.create(),
-
-                // Функция установки соединения с сервером по WebSocket.
-                connect = $.proxy(application.connect, application),
-
-                // Получить инстанс модельки пользователя, что используется в сессии
-                user = container.lookup('auth:user');
-
-            // Тормозим инициализацию роутера, пока не получим
-            // информацию об авторизованном пользователе
-            App.deferReadiness();
-
-            // Передаем объект пользователя в сессию
-            session.setUser(user);
-
-            // Записываем объект сессии в приложение
-            application.reopen({
-
-                /** @member {App.Session} Объект сессии */
-                session: session
-
-            });
-
-            // Проверяем заполненость сессии данными
-            session.ready().then(connect).then(function() {
-                // Разблокируем инициализацию роутера
-                App.advanceReadiness();
-            }).catch(function() {
-                // Разблокируем инициализацию роутера
-                App.advanceReadiness();
-            });
-
-            // Здесь можно подписаться на событие заполнености сессии
-            // session.on('furnish', connect);
-
-            // Регистрируем объект сессии в App с именем session:main.
-            application.register('session:main', session, {instantiate: false});
-
-            // Поскольку сессия является аспектом приложения, знаниям о ней
-            // необходимо снабдить определенные слои, такие как контроллер и
-            // роутер. В серверных приложениях, как правило сессия находится в
-            // запросе.
-
-            // В понятие контроллера вставляем знания о session.
-            // Таким образом экземпляр класса Session становится доступен по
-            // ключу `session` из любого контроллера этого приложения. Далее он 
-            // может быть использован для проверки авторизации пользователя или
-            // для создания соотв. свойства контроллера для проверки
-            // авторизации внутри используемых шаблонов.
-            application.inject('controller', 'session', 'session:main');
-
-            // В понятие роутера также вставляем знания о session.
-            // Это нужно для того чтобы роутер мог определить
-            // доступность контроллера.
-            application.inject('route', 'session', 'session:main');
-        }
-    });
-
-
-    App.initializer({
-
-        /** @member {String} Название инициалайзера */
-        name: 'connection',
-
-        /** @member {String} Выполнить после создания объекта сессии */
-        after: 'session',
-
-        /**
-         * @method
-         * @param {Ember.Container}     container   - Хранилище данных.
-         * @param {Ember.Application}   application - Приложение.
-         */
-        initialize: function(container, application) {
-
-            Ember.Logger.debug("Initializer: Создаем понятие соединения по WebSocket.");
-
-            // Создаем экземпляр класса
-            var connector = App.ConnectionProxy.extend({});
-
-            // Регистрируем этот класс в App с именем connector:connector.
-            application.register('connection:connector', connector, {
-                singleton: true
-            });
-        }
-    });
-
-
-    App.initializer({
-
-        /** @member {String} Название инициалайзера */
-        name: 'connection-adapter',
-
-        /** @member {String} Выполнить после создания объекта соединения */
-        after: 'connection',
-
-        /**
-         * @method
-         * @param {Ember.Container}     container   - Хранилище данных.
-         * @param {Ember.Application}   application - Приложение.
-         */
-        initialize: function(container, application) {
-
-            Ember.Logger.debug("Initializer: Создаем понятие адаптера для соединения.");
-
-            var connector = container.lookup('connection:connector'),
-                session = container.lookup('session:main'),
-
-                // Дополняем объект знаниями о сессии и коннекторе.
-                ConnectionAdapter = App.ConnectionAdapter.extend({
-
-                    /** @member {App.ConnectionProxy} Объект соединения */
-                    connector: connector,
-
-                    /** @member {App.Session} Объект сессии */
-                    session: session,
-
-                });
-
-            // Создаем экземпляр класса
-            var adapter = ConnectionAdapter.create();
-
-            // Записываем объект адаптера соединения в приложение
-            application.reopen({
-
-                /** @member {App.ConnectionAdapter} Адаптер */
-                adapter: adapter
-
-            });
-
-            // Регистрируем этот класс в App с именем connector:adapter.
-            application.register('connection:adapter', adapter, {
-                instantiate: false
-            });
-
-            // Даем доступ к соединению контроллерам (в частности login),
-            // через адаптер
-            application.inject('route', 'connection', 'connection:adapter');
-
-            application.inject('controller', 'connection', 'connection:adapter');
-        }
-    });
-
     return App;
 
 }));

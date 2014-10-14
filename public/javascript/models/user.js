@@ -40,12 +40,31 @@
         password: DS.attr('string'),
 
         /**
+         * Гео-точки пользователя
+         * @member {Function} points
+         * @memberof App.User
+         */
+        points: DS.hasMany(App.GeoPoint, {async: true}),
+
+        /**
+         * Метод для добавления точек.
+         * @method pushPoint
+         * @memberof App.User
+         * @return {Promise}
+         */
+        pushPoint: function(point) {
+            return this.get('points').then(function(points) {
+                return points.pushObject(point);
+            });
+        },
+
+        /**
          * Перезависываем метод сохранения.
-         * @method
+         * @method save
          * @memberof App.User
          */
         save: function() {
-            // todo: ключ для пользователя
+            // todo: ключ для пользователя вынеси в конфиг
             var key = User.getKey(),
                 payload = JSON.stringify(this);
 

@@ -1,42 +1,70 @@
-App.GoogleMapsComponent = Ember.Component.extend({
+// Точка с запятой здесь нужна, чтобы не случилось батхёрта
+// у программиста, который без разбора лепит все файлы в один и
+// нечайно пропустил точку с запятой в конце.
+;(function(root, factory) {
 
-    coordinatesChanged: function() {
+    if (typeof define === 'function' && define.amd) {
+        // Декларируем роутеры с соотв. с окружением. Начнет с AMD.
+        define(['exports', 'ember'], factory);
+    } else {
+        // Иначе пишем все в `root` который наверняка является объектом `window`.
+        factory(root, root.Ember);
+    }
 
-        var map = this.get('map'),
-            coord = new google.maps.LatLng(
-                this.get('latitude'),
-                this.get('longitude'));
+}(this, function(exports, Ember) {
 
-      map && map.setCenter(coord);
+    "use strict";
 
-    }.observes('latitude', 'longitude'),
+    // Перестраховка
+    exports.App = exports.App || {};
 
-    setMarkers: function() {
-        var map = this.get('map'),
-            markers = this.get('markers');
+    /**
+     * Компонент "карта" (от Google Maps).
+     * @class GoogleMapsComponent
+     * @memberof App
+     */
+    var GoogleMapsComponent = exports.App.GoogleMapsComponent = Ember.Component.extend({
 
-        console.log(markers);
+        coordinatesChanged: function() {
 
-        markers.forEach(function(marker){
-            new google.maps.Marker({
-                position: new google.maps.LatLng(marker.get('latitude'), marker.get('longitude')),
-                map: map
-            });
-        }, this);
-    }.observes('markers.@each.latitude', 'markers.@each.longitude'),
+            var map = this.get('map'),
+                coord = new google.maps.LatLng(
+                    this.get('latitude'),
+                    this.get('longitude'));
 
-    insertMap: function() {
-        var container = this.$(".map-canvas");
+          map && map.setCenter(coord);
 
-        var options = {
-            center: new google.maps.LatLng(this.get("latitude"), this.get("longitude")),
-            zoom: 2,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
-        };
+        }.observes('latitude', 'longitude'),
 
-        this.set('map', new google.maps.Map(container[0], options));
+        setMarkers: function() {
+            var map = this.get('map'),
+                markers = this.get('markers');
 
-        this.setMarkers();
+            markers.forEach(function(marker){
+                new google.maps.Marker({
+                    position: new google.maps.LatLng(marker.get('latitude'), marker.get('longitude')),
+                    map: map
+                });
+            }, this);
+        }.observes('markers.@each.latitude', 'markers.@each.longitude'),
 
-    }.on('didInsertElement')
-});
+        insertMap: function() {
+            var container = this.$(".map-canvas");
+
+            var options = {
+                center: new google.maps.LatLng(this.get("latitude"), this.get("longitude")),
+                zoom: 10,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                disableDefaultUI: true
+            };
+
+            this.set('map', new google.maps.Map(container[0], options));
+
+            this.setMarkers();
+
+        }.on('didInsertElement')
+    });
+
+    return GoogleMapsComponent;
+
+}));

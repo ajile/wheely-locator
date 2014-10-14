@@ -53,3 +53,5 @@ http://emberjs.com/guides/routing/defining-your-routes/#toc_initial-routes
 6. Привести комментарии к модулям, неймспейсам, классам, функциям, переменным, методам и т.п. в соотв. с DocComment
 
 7. Реализовать коллекцию точек координат по принципу FIFO (First In, First Out)
+
+8. Нашел статью: http://discuss.emberjs.com/t/services-a-rumination-on-introducing-a-new-role-into-the-ember-programming-model/4947 - можно внедрить такой подход, а то размер инициалайзеров уже устрашающий - они превратились в спагети-код.

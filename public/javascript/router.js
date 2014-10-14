@@ -43,11 +43,13 @@
         isAuthenticated: Ember.computed.alias('session.isAuthenticated'),
 
         /**
-         * @method
+         * @method setupController
+         * @memberof App.AuthMixin
+         * @private
          */
         setupController: function() {
 
-            this._super();
+            this._super.apply(this, arguments);
 
             // Дополняем контроллер знаниями об авторизованности.
             this.controller.reopen({
@@ -65,7 +67,7 @@
              * Обработчик события `login`. Устанавливает соединение с
              * сервером, с заданными `username` и `password`, ответ типа
              * promise отправляет в пришедшую функцию `cb`.
-             * @method
+             * @method login
              * @param {String}     username   - Имя пользователя.
              * @param {String}     password   - Пароль пользователя.
              * @param {Function}   cb         - Callback функция.
@@ -78,7 +80,33 @@
                 /** @type {Promise} */
                 var p = connection.connect(username, password);
 
+                // Если авторизация прошла успешно
+                p.then(Ember.$.proxy(function() {
+
+                    // Контроллер авторизации
+                    var loginController = this.controllerFor('login'),
+
+                        // Предыдущий "экран"
+                        previousTransition = loginController.get('previousTransition');
+
+                    if (previousTransition) {
+                        // Удаляем информацию о предыдущем экране
+                        loginController.set('previousTransition', null);
+
+                        // Переход...
+                        previousTransition.retry();
+                    } else {
+                        // Если предыдущего экрана нет, перекидывает на главную
+                        // страницу, откуда уже авторизованный пользователь
+                        // может быть переброшен на любой другой экран.
+                        loginController.transitionToRoute('index');
+                    }
+
+                }, this));
+
                 cb(p);
+
+                return p;
             },
 
             /**
@@ -103,6 +131,8 @@
                     this.transitionTo(routerName)
 
                 }, this));
+
+                return p;
 
             }
         },
@@ -147,13 +177,27 @@
          * не авторизован его перекидывает на страницу `login`.
          * @method beforeModel
          */
-        beforeModel: function() {
+        beforeModel: function(transition) {
 
+            // Имя роутера куда перебросить пользователя, если он не авторизован
             var routerName = this.get('loginRouterName');
 
-            // Если пользователь не авторизован, перекидываем его на экран
-            // с формой авторизации.
-            this.get('isAuthenticated') || this.transitionTo(routerName);
+            // Если пользователь не авторизован...
+            if (!this.get('isAuthenticated')) {
+
+                // Контроллер, отвечающий за авторизацию
+                var loginController = this.controllerFor('login');
+
+                // В него и пишем попытку перехода и...
+                loginController.set('previousTransition', transition);
+
+                transition.abort();
+
+                // ...перекидываем пользователя на экран с формой авторизации.
+                this.transitionTo(routerName);
+            }
+
+            return this._super.apply(this, arguments);
 
         }
 
@@ -201,10 +245,10 @@
      */
     var IndexRoute = routers['IndexRoute'] = AuthRoute.extend({
 
-        beforeModel: function() {
+        beforeModel: function(transition) {
 
             // Проверка в родительском объекте на авторизацию польвазователя.
-            this._super();
+            this._super.apply(this, arguments);
 
             // Пользователь оказался авторизованным - перекидываем его на
             // страницу с картой.
@@ -221,20 +265,51 @@
      */
     var MapsRoute = routers['MapsRoute'] = AuthRoute.extend({
 
-        model: function() {
-            return Ember.Object.create({
-                markers: [
-                    // Prague
-                    Ember.Object.create({ latitude: 50.08703, longitude: 14.42024 }),
-                    Ember.Object.create({ latitude: 50.08609, longitude: 14.42091 }),
+        // /**
+        //  * @method setupController
+        //  * @memberof App.MapsRoute
+        //  * @private
+        //  */
+        // setupController: function(controller, model) {
 
-                    Ember.Object.create({ latitude: 40.71356, longitude: -74.00632 }), // New York
-                    Ember.Object.create({ latitude: -33.86781, longitude: 151.20754 }) // Sydney
-                ]
-            });
-        }
+        //     console.log(model);
+        //     console.log(model);
+        //     console.log(model);
+        //     console.log(model);
 
-    })
+        //     this._super.apply(this, arguments);
+
+        // },
+
+        // model: function() {
+        //     return new Promise(function(resolve, reject) {
+        //         var data = [
+        //             {title: "Tomster", url: "http://emberjs.com/images/about/ember-productivity-sm.png"},
+        //             {title: "Eiffel Tower", url: "http://emberjs.com/images/about/ember-structure-sm.png"}
+        //         ];
+
+        //         resolve(data);
+        //     });
+        // }
+
+        // // deserialize: function(router, param) {
+        // //     console.log(router, param);
+        // // },
+
+        // // model: function() {
+        // //     return Ember.Object.create({
+        // //         markers: [
+        // //             // Prague
+        // //             Ember.Object.create({ latitude: 50.08703, longitude: 14.42024 }),
+        // //             Ember.Object.create({ latitude: 50.08609, longitude: 14.42091 }),
+
+        // //             Ember.Object.create({ latitude: 40.71356, longitude: -74.00632 }), // New York
+        // //             Ember.Object.create({ latitude: -33.86781, longitude: 151.20754 }) // Sydney
+        // //         ]
+        // //     });
+        // // }
+
+    });
 
     /**
      * Роутер отвечающий за прорисовку экрана с формой авторизации.
@@ -245,11 +320,13 @@
     var LoginRoute = routers['LoginRoute'] = BaseRoute.extend({
 
         /**
-         * @method
+         * @method setupController
+         * @memberof LoginRoute
+         * @private
          */
         setupController: function(controller, context) {
 
-            this._super();
+            this._super.apply(this, arguments);
 
             // Очищаем контроллер - по существу очищаем форму аутентификации.
             controller.reset();

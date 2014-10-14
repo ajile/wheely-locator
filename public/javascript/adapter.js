@@ -22,7 +22,7 @@
      * @class ConnectionAdapter
      * @memberof App
      */
-    var ConnectionAdapter = exports.App.ConnectionAdapter = Ember.Object.extend({
+    var ConnectionAdapter = exports.App.ConnectionAdapter = Ember.Object.extend(Ember.Evented, {
 
         /** @member {App.ConnectionProxy} Объект соединения */
         connector: null,
@@ -39,8 +39,13 @@
          */
         connect: function(username, password) {
 
+            username = username || this.get('session').get('user').get('username');
+            password = password || this.get('session').get('user').get('password');
+
             /** @type {App.ConnectionProxy} */
             var c = this.get('connector');
+
+            this._initObservers();
 
             return new Promise(_.bind(function(resolve, reject) {
 
@@ -55,6 +60,22 @@
                 c.connect(username, password).then(resolve, reject);
 
             }, this));
+        },
+
+        _initObservers: function() {
+
+            /** @type {App.ConnectionProxy} */
+            var c = this.get('connector');
+
+            if (!c.has('close')) {
+                c.on('close', function() {
+                    console.log(arguments);
+                });
+            }
+
+            if (!c.has('message')) {
+                c.on('message', Ember.$.proxy(this.onMessage, this));
+            }
         },
 
         /**
@@ -74,9 +95,24 @@
 
                 this.get('session').logout();
 
+                this.trigger('disconnect', this);
+
             }, this));
 
             return r;
+        },
+
+        /**
+         * Пришло сообщение от сокета.
+         * @param {String}      username    Имя пользователя
+         * @param {String}      password    Пароль пользователя
+         * @param {Function}    cb          Функция обратного вызова
+         * @method
+         */
+        onMessage: function(messageData) {
+            var data = JSON.parse(messageData);
+            Ember.Logger.debug("ConnectionAdapter: Событие onMessage: ", data);
+            this.trigger('message', data);
         },
 
         /**
@@ -88,6 +124,7 @@
          */
         onResolve: function(username, password, cb) {
             this.get('session').authenticate(username, password);
+            this.trigger('connect', this);
             cb();
         },
 
@@ -99,6 +136,10 @@
         onReject: function(cb) {
             // this.get('session').set('isAuthenticated', false);
             cb();
+        },
+
+        sendObject: function(obj) {
+            return this.get('connector').send(JSON.stringify(obj));
         }
 
     })

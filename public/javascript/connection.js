@@ -20,7 +20,7 @@
      * @class ConnectionProxy
      * @memberof App
      */
-    var ConnectionProxy = exports.App.ConnectionProxy = Ember.Object.extend({
+    var ConnectionProxy = exports.App.ConnectionProxy = Ember.Object.extend(Ember.Evented, {
 
         /**
          * @todo: Вытащить в отдельный конфиг
@@ -30,6 +30,15 @@
 
         /** @member {?WebSocket} Объект сокета */
         socket: null,
+
+        isConnected: function() {
+            if (this.get('socket') === null) {
+                return false;
+            } else {
+                return this.get('socket') instanceof WebSocket &&
+                       this.get('socket').readyState === WebSocket.OPEN;
+            }
+        }.property('socket'),
 
         /**
          * Установка соединения через WebSocket с сервером.
@@ -50,12 +59,13 @@
                 url = [this.get('socketURL'), '?', params].join('');
 
             return new Promise(Ember.$.proxy(function(resolve, reject) {
+
                 Ember.Logger.debug("%cConnectionProxy: Устанавливаем соединение по WebSocket... "+url+"", 'font-weight:900;');
 
                 this.socket = new WebSocket(url);
 
                 this.socket.onopen = _.partial(Ember.$.proxy(this.onOpen, this), resolve);
-                this.socket.onerror = _.partial(Ember.$.proxy(this.onError, reject), reject);
+                this.socket.onerror = _.partial(Ember.$.proxy(this.onError, this), reject);
 
                 this.socket.onmessage = Ember.$.proxy(this.onMessage, this);
                 this.socket.onclose = Ember.$.proxy(this.onClose, this);
@@ -78,6 +88,13 @@
             }, this));
         },
 
+        send: function(message) {
+            if (this.get('socket').readyState !== WebSocket.OPEN) {
+                throw new Error("Websocket is closed");
+            }
+            this.get('socket').send(message);
+        },
+
         /**
          * Соединение прошло успешно.
          * @param {Function}    cb          Функция обратного вызова
@@ -93,6 +110,8 @@
 
             // Вызываем callback
             cb.call(this, args);
+
+            this.trigger('open');
         },
 
         /**
@@ -110,6 +129,8 @@
 
             // Вызываем callback
             cb.call(this, args);
+
+            this.trigger('error');
         },
 
         /**
@@ -118,8 +139,9 @@
          * @method
          * @private
          */        
-        onMessage: function() {
+        onMessage: function(message) {
             Ember.Logger.debug("ConnectionProxy: Событие onMessage: ", arguments);
+            this.trigger('message', message.data, this);
         },
 
         /**
@@ -130,6 +152,8 @@
          */        
         onClose: function() {
             Ember.Logger.debug("ConnectionProxy: Событие onClose: ", arguments);
+            console.log(123);
+            this.trigger('close');
         }
     });
 

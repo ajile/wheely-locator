@@ -3,6 +3,15 @@ App.ApplicationController = Ember.Controller.extend({
 });
 
 /**
+ * Контроллер карты.
+ * @class MapsController
+ * @memberof App
+ */
+App.MapsController = Ember.Controller.extend({
+
+});
+
+/**
  * Контроллер авторизации.
  * @class LoginController
  * @memberof App

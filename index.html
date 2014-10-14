@@ -33,13 +33,33 @@
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/ember-data.js/1.0.0-beta.10/ember-data.min.js"></script>
     <script>window.Ember || document.write('<script src="/public/javascript/vendor/ember-data.min.js" %}"><\/script>')</script>
 
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=true"></script>
+
+    <script type="text/javascript">
+      function initialize() {
+        var mapOptions = {
+          center: new google.maps.LatLng(-34.397, 150.644),
+          zoom: 8,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        var map = new google.maps.Map(document.getElementById("maps_canvas"),
+            mapOptions);
+      }
+    </script>
+
     <script type="text/javascript" src="/public/javascript/lib.js"></script>
 </head>
 <body>
+
     <script type="text/x-handlebars">
         <div class="app-wrapper">
         {{outlet}}
         </div>
+    </script>
+
+
+    <script type="text/x-handlebars" id="components/google-maps">
+        <div class="map-canvas"></div>
     </script>
 
 
@@ -77,8 +97,8 @@
             <h1>Карта</h1>
         </header>
 
-        <section id="maps">
-            КАРТА ТУТ
+        <section id="maps_canvas">
+            {{google-maps latitude="40.7142700" longitude="-74.0059700" markers=markers}}
         </section>
 
         <footer id="footer">
@@ -95,6 +115,7 @@
     <script type="text/javascript" src="/public/javascript/adapter.js"></script>
     <script type="text/javascript" src="/public/javascript/router.js"></script>
     <script type="text/javascript" src="/public/javascript/controller.js"></script>
+    <script type="text/javascript" src="/public/javascript/component.js"></script>
     <script type="text/javascript" src="/public/javascript/models/user.js"></script>
     <!-- ... наше приложение подключается здесь КОН ... -->
 </body>

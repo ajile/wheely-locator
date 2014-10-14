@@ -219,7 +219,22 @@
      * @augments App.AuthRoute
      * @memberof App
      */
-    var MapsRoute = routers['MapsRoute'] = AuthRoute.extend({})
+    var MapsRoute = routers['MapsRoute'] = AuthRoute.extend({
+
+        model: function() {
+            return Ember.Object.create({
+                markers: [
+                    // Prague
+                    Ember.Object.create({ latitude: 50.08703, longitude: 14.42024 }),
+                    Ember.Object.create({ latitude: 50.08609, longitude: 14.42091 }),
+
+                    Ember.Object.create({ latitude: 40.71356, longitude: -74.00632 }), // New York
+                    Ember.Object.create({ latitude: -33.86781, longitude: 151.20754 }) // Sydney
+                ]
+            });
+        }
+
+    })
 
     /**
      * Роутер отвечающий за прорисовку экрана с формой авторизации.

@@ -25,15 +25,24 @@
      */
     var User = exports.App.User = DS.Model.extend({
 
-        /** @member {Object} Имя пользователя */
+        /**
+         * Имя пользователя
+         * @member {Object} username
+         * @memberof App.User
+         */
         username: DS.attr('string'),
 
-        /** @member {Object} Пароль пользователя */
+        /**
+         * Пароль пользователя
+         * @member {Object} password
+         * @memberof App.User
+         */
         password: DS.attr('string'),
 
         /**
          * Перезависываем метод сохранения.
          * @method
+         * @memberof App.User
          */
         save: function() {
             // todo: ключ для пользователя
@@ -46,6 +55,11 @@
             // throw new Error('The user model is not committable.');
         },
 
+        /**
+         * @private
+         * @method
+         * @memberof App.User
+         */
         toStringExtension: function() {
             return [this.get('username'), this.get('password')].join(' ');
         }

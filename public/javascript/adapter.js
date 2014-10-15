@@ -30,6 +30,12 @@
         /** @member {App.Session} Объект сессии */
         session: null,
 
+        /** @member {Number} Всего попыток установить соединение */
+        numberOfAttempts: 5,
+
+        /** @member {Number} Было совершено попыток */
+        attempts: 0,
+
         /**
          * Установка соединения с сервером.
          * @method
@@ -39,27 +45,80 @@
          */
         connect: function(username, password) {
 
-            username = username || this.get('session').get('user').get('username');
-            password = password || this.get('session').get('user').get('password');
-
             /** @type {App.ConnectionProxy} */
             var c = this.get('connector');
 
-            this._initObservers();
+            // Проверять статус соединения, если соединен, возвращать выполненое
+            // обещание, если соединяется - возвращать обещание, если закрыт -
+            // (инструкцию, что ниже), если статус "закрывается" - нужно
+            // дождаться конца и вернуть обещание на открытие.
 
-            return new Promise(_.bind(function(resolve, reject) {
+            // Пользователя и пароль, в случае если в аргументах они не пришли
+            // берем из объекта сессии.
+            username = username || this.get('session').get('user').get('username');
+            password = password || this.get('session').get('user').get('password');
 
-                // Соединение установлено
-                var resolve = _.bind(this.onResolve, this,
-                    username, password, resolve),
+            // Кол-во попыток установить связь с сервером было сделано...
+            var attempts = this.get('attempts'),
 
-                    // Соединение прошло с ошибкой
-                    reject = _.bind(this.onReject, this, reject)
+                // ...из возможных
+                numberOfAttempts = this.get('numberOfAttempts');
 
-                // Коннектимся
-                c.connect(username, password).then(resolve, reject);
+            var lpromise = new Ember.$.Deferred();
 
-            }, this));
+            var wrappedResolve = _.bind(this.onResolve, this, username, password, lpromise.resolve);
+            var wrappedReject = _.bind(this.onReject, this, lpromise.reject);
+
+            var retry = _.bind(function () {
+
+                // Увеличиваем показатель кол-ва попыток
+                attempts = this.incrementProperty('attempts');
+
+                // Подсчитываем время, которое нужно выждать до следующей
+                // попытки. Возможно увеличивать его экспоненциально по
+                // следующей формуле ```Math.pow(25, attempts)```
+                var timeToNextTry = attempts * 1000;
+
+                Ember.Logger.debug("ConnectionAdapter: Попытка установить соединение #%d из %d провалена", attempts, numberOfAttempts);
+
+                if (attempts >= numberOfAttempts) {
+                    Ember.Logger.debug("ConnectionAdapter: Больше попыток нет");
+                    // Если совершенных попыток соединения было больше
+                    // максимально допустимых, вызываем `reject` метод
+                    // обещания
+                    wrappedReject();
+                    return;
+                }
+
+                Ember.Logger.debug("ConnectionAdapter: Попытаемся снова через %d сек.", Math.ceil(timeToNextTry / 1000));
+
+                return new Ember.$.Deferred(function(a, b) {
+                    setTimeout(function() {
+                        var n = c.connect(username, password);
+                        n.then(wrappedResolve);
+                        n.catch(retry);
+                    }, timeToNextTry);
+                }).promise();
+
+            }, this);
+
+            // Коннектимся
+            var promise = c.connect(username, password);
+
+            // Если успешно, вызываем метод onResolve, который авторизует
+            // пользователя и записывает в сессию подошежшие данные, а также
+            // функцию выполнение которой ожидает запрашивающая сторона
+            promise.then(wrappedResolve);
+
+            // Если попытка соединения была провалена, пытаемся снова...
+            promise.catch(retry);
+
+            // ииии...возвращаем чистый promise объект
+            return lpromise.promise();
+        },
+
+        resetAttempts: function() {
+            return this.set('attempts', 0);
         },
 
         _initObservers: function() {
@@ -67,15 +126,27 @@
             /** @type {App.ConnectionProxy} */
             var c = this.get('connector');
 
-            if (!c.has('close')) {
-                c.on('close', function() {
-                    console.log(arguments);
-                });
-            }
-
             if (!c.has('message')) {
                 c.on('message', Ember.$.proxy(this.onMessage, this));
             }
+
+            if (!c.has('error')) {
+                c.on('error', Ember.$.proxy(this.onError, this));
+            }
+
+            if (!c.has('close')) {
+                c.on('close', Ember.$.proxy(this.onClose, this));
+            }
+        },
+
+        _removeObservers: function() {
+
+            /** @type {App.ConnectionProxy} */
+            var c = this.get('connector');
+
+            c.has('message') && c.off('message');
+            c.has('error') && c.off('error');
+            c.has('close') && c.off('close');
         },
 
         /**
@@ -103,16 +174,36 @@
         },
 
         /**
+         * Закрытие.
+         * @method
+         */
+        onClose: function(closeEvent) {
+            this._removeObservers();
+
+            // Соединение было разорвано или нет причины
+            if (!closeEvent.wasClean || closeEvent.code == '1005') {
+                setTimeout(Ember.$.proxy(this.connect, this), 10000);
+            } else {
+                this.trigger('close', closeEvent, this);
+            }
+        },
+
+        /**
+         * Пришла ошибка.
+         * @method
+         */
+        onError: function(errorEvent) {
+            this.trigger('message', errorEvent, this);
+        },
+
+        /**
          * Пришло сообщение от сокета.
-         * @param {String}      username    Имя пользователя
-         * @param {String}      password    Пароль пользователя
-         * @param {Function}    cb          Функция обратного вызова
          * @method
          */
         onMessage: function(messageData) {
             var data = JSON.parse(messageData);
-            Ember.Logger.debug("ConnectionAdapter: Событие onMessage: ", data);
-            this.trigger('message', data);
+            // Ember.Logger.debug("ConnectionAdapter: Событие onMessage: ", data);
+            this.trigger('message', data, this);
         },
 
         /**
@@ -123,6 +214,7 @@
          * @method
          */
         onResolve: function(username, password, cb) {
+            this._initObservers();
             this.get('session').authenticate(username, password);
             this.trigger('connect', this);
             cb();
@@ -131,10 +223,10 @@
         /**
          * Соединение прошло с ошибкой.
          * @param {Function}    cb          Функция обратного вызова
+         * @param {CloseEvent}  closeEvent
          * @method
          */
-        onReject: function(cb) {
-            // this.get('session').set('isAuthenticated', false);
+        onReject: function(cb, closeEvent) {
             cb();
         },
 

@@ -15,6 +15,9 @@
 
     "use strict";
 
+    // Для ручного тестирования
+    // var t = 0;
+
     /**
      * Класс соединения.
      * @class ConnectionProxy
@@ -27,6 +30,9 @@
          * @member {App.ConnectionProxy} Урл WebSocket сервиса
          */
         socketURL: 'ws://mini-mdt.wheely.com',
+
+        // Для ручного тестирования
+        // socketURL: 'ws://broken.com',
 
         /** @member {?WebSocket} Объект сокета */
         socket: null,
@@ -70,6 +76,11 @@
                 this.socket.onmessage = Ember.$.proxy(this.onMessage, this);
                 this.socket.onclose = Ember.$.proxy(this.onClose, this);
 
+                // Для ручного тестирования
+                // t++;
+                // if (t == 3)
+                // this.set('socketURL', 'ws://mini-mdt.wheely.com');
+
             }, this));
         },
 
@@ -109,7 +120,7 @@
             var args = Array.prototype.slice.call(arguments, 1);
 
             // Вызываем callback
-            cb.call(this, args);
+            cb.apply(this, args);
 
             this.trigger('open');
         },
@@ -128,7 +139,7 @@
             var args = Array.prototype.slice.call(arguments, 1);
 
             // Вызываем callback
-            cb.call(this, args);
+            cb.apply(this, args);
 
             this.trigger('error');
         },
@@ -140,20 +151,19 @@
          * @private
          */        
         onMessage: function(message) {
-            Ember.Logger.debug("ConnectionProxy: Событие onMessage: ", arguments);
+            // Ember.Logger.debug("ConnectionProxy: Событие onMessage: ", arguments);
             this.trigger('message', message.data, this);
         },
 
         /**
          * Хендлер события onClose.
-         * @param {Function}    cb          Функция обратного вызова
+         * @param {CloseEvent}    closeEvent
          * @method
          * @private
          */        
-        onClose: function() {
-            Ember.Logger.debug("ConnectionProxy: Событие onClose: ", arguments);
-            console.log(123);
-            this.trigger('close');
+        onClose: function(closeEvent) {
+            Ember.Logger.debug("ConnectionProxy: Событие onClose: ", closeEvent);
+            this.trigger('close', closeEvent);
         }
     });
 

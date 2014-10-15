@@ -42,7 +42,6 @@
 
     <!-- javascript-mobile-desktop-geolocation -->
     <script type="text/javascript" src="/public/javascript/vendor/geoPosition.js"></script>
-    <script type="text/javascript" src="/public/javascript/vendor/geoPositionSimulator.js"></script>
 
     <!-- Google карты -->
     <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=true"></script>
@@ -73,7 +72,7 @@
         {{#if isAuthenticated}}
             <section id="login">Вы авторизованы</section>
             <footer id="footer">
-                {{#link-to 'maps'}}<button>Перейти к карте</button>{{/link-to}}
+                {{#link-to 'maps'}}<button class="green">Перейти к карте</button>{{/link-to}}
                 <button {{action logout}}>Выйти</button>
             </footer>
         {{else}}
@@ -100,7 +99,7 @@
         </header>
 
         <section class="maps">
-            {{google-maps latitude="55.7500" longitude="37.6167" markers=markers}}
+            {{google-maps latitude="55.7500" longitude="37.6167" coords=coords}}
         </section>
 
         <footer id="footer">

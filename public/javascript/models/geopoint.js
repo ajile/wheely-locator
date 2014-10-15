@@ -20,22 +20,22 @@
 
     /**
      * Моделька гео-точки
-     * @class GeoPoint
+     * @class Geopoint
      * @memberof App
      */
-    var GeoPoint = exports.App.GeoPoint = DS.Model.extend({
+    var Geopoint = exports.App.Geopoint = DS.Model.extend({
 
         /**
          * Широта
          * @member {Object} latitude
-         * @memberof App.GeoPoint
+         * @memberof App.Geopoint
          */
         latitude: DS.attr('string'),
 
         /**
          * Долгота
          * @member {Object} longitude
-         * @memberof App.GeoPoint
+         * @memberof App.Geopoint
          */
         longitude: DS.attr('string'),
 
@@ -46,13 +46,13 @@
         /**
          * @private
          * @method
-         * @memberof App.GeoPoint
+         * @memberof App.Geopoint
          */
         toStringExtension: function() {
             return [this.get('latitude'), this.get('longitude')].join('x');
         }
     });
 
-    return GeoPoint;
+    return Geopoint;
 
 }));

@@ -48,8 +48,8 @@
          */
         geolocator: null,
 
-        /** @member {App.CoordsCollection} Объект отвечающий на соединение */
-        coords: Ember.computed.alias('coords'),
+        /** @member {App.CoordsCollection} Объект содержит в себе координаты с сервера */
+        coords: null,
 
         ready: function() {
 
@@ -93,7 +93,7 @@
         /**
          * Хендлер для события `App#geolocator.event:change` от
          * адаптера соединения
-         * @method onConnect
+         * @method onPositionChange
          * @memberof App
          */
         onPositionChange: function(geoposition, geolocator) {
@@ -115,24 +115,16 @@
         /**
          * Хендлер для события `App#geolocator.event:change` от
          * адаптера соединения
-         * @method onConnect
+         * @method onPositionServerChange
          * @memberof App
          */
         onPositionServerChange: function(data) {
 
             Ember.Logger.debug("%cApp: Серверные координаты", "font-weight:900;", data);
 
-            // this.get('coords').set('coords', data);
+            var coords = this.get('coords');
 
-            // /** @type {App.ConnectionAdapter} */
-            // var adapter = this.get('adapter');
-
-            // var coords = {
-            //     lat: geoposition.coords.latitude,
-            //     lon: geoposition.coords.longitude
-            // };
-
-            // adapter.sendObject(coords);
+            coords.set('content', data);
 
         },
 
@@ -254,27 +246,22 @@
         name: 'coords_store',
 
         initialize: function(container, application) {
-            // var store = container.lookup('store:main');
-            // var localPosts = store.all('post');
-            // console.log(localPosts);
-            var CoordsCollection = exports.App.CoordsCollection = Ember.Object.extend({
 
-                store: container.lookup('store:main'),
-
-                setCoords: function(data) {
-                    // this.get('store').unloadAll('coord');
-                    console.log(data);
-                }
-
+            var CoordsCollection = exports.App.CoordsCollection = Ember.ArrayProxy.extend({
+                content: Ember.A(),
             });
-
             var coords = CoordsCollection.create();
+
+            application.reopen({
+                coords: coords
+            });
 
             application.register('coords:main', coords, {instantiate: false});
 
-            container.injection('application', 'coords', 'coords:main');
+            application.inject('controller:maps', 'coords', 'coords:main');
         }
     });
+
     return App;
 
 }));

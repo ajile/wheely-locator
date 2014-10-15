@@ -74,7 +74,7 @@
 
             this.user = user;
 
-            Ember.Logger.debug("Session: Задан пользователь:", user);
+            Ember.Logger.debug("Session: Задан пользователь: %o", user);
 
             // Для цепочки
             return this;

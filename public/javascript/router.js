@@ -263,53 +263,7 @@
      * @augments App.AuthRoute
      * @memberof App
      */
-    var MapsRoute = routers['MapsRoute'] = AuthRoute.extend({
-
-        // /**
-        //  * @method setupController
-        //  * @memberof App.MapsRoute
-        //  * @private
-        //  */
-        // setupController: function(controller, model) {
-
-        //     console.log(model);
-        //     console.log(model);
-        //     console.log(model);
-        //     console.log(model);
-
-        //     this._super.apply(this, arguments);
-
-        // },
-
-        // model: function() {
-        //     return new Promise(function(resolve, reject) {
-        //         var data = [
-        //             {title: "Tomster", url: "http://emberjs.com/images/about/ember-productivity-sm.png"},
-        //             {title: "Eiffel Tower", url: "http://emberjs.com/images/about/ember-structure-sm.png"}
-        //         ];
-
-        //         resolve(data);
-        //     });
-        // }
-
-        // // deserialize: function(router, param) {
-        // //     console.log(router, param);
-        // // },
-
-        // // model: function() {
-        // //     return Ember.Object.create({
-        // //         markers: [
-        // //             // Prague
-        // //             Ember.Object.create({ latitude: 50.08703, longitude: 14.42024 }),
-        // //             Ember.Object.create({ latitude: 50.08609, longitude: 14.42091 }),
-
-        // //             Ember.Object.create({ latitude: 40.71356, longitude: -74.00632 }), // New York
-        // //             Ember.Object.create({ latitude: -33.86781, longitude: 151.20754 }) // Sydney
-        // //         ]
-        // //     });
-        // // }
-
-    });
+    var MapsRoute = routers['MapsRoute'] = AuthRoute.extend({});
 
     /**
      * Роутер отвечающий за прорисовку экрана с формой авторизации.

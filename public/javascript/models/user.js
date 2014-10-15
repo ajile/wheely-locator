@@ -40,25 +40,6 @@
         password: DS.attr('string'),
 
         /**
-         * Гео-точки пользователя
-         * @member {Function} points
-         * @memberof App.User
-         */
-        points: DS.hasMany(App.GeoPoint, {async: true}),
-
-        /**
-         * Метод для добавления точек.
-         * @method pushPoint
-         * @memberof App.User
-         * @return {Promise}
-         */
-        pushPoint: function(point) {
-            return this.get('points').then(function(points) {
-                return points.pushObject(point);
-            });
-        },
-
-        /**
          * Перезависываем метод сохранения.
          * @method save
          * @memberof App.User
@@ -95,38 +76,6 @@
     User.getKey = function() {
         return 'user-1';
     }
-
-    var UserAdapter = exports.App.UserAdapter = DS.FixtureAdapter.extend({
-
-        /**
-         * Unfinished
-         */
-//        find: function(store, type, id) {
-//
-//            var serializer = store.serializerFor(type.typeKey);
-//
-//            // Ключик, под которым лежат данные пользователя
-//            var key = 'user-' + parseInt(id),
-//
-//                // Смотрим в куках
-//                rawSerializedData = $.cookie(key),
-//
-//                data = null;
-//
-//            rawSerializedData = '{"id":1,"username":"asdasd","password":"aaaa"}';
-//
-//            try {
-//                return Promise.resolve(JSON.parse(rawSerializedData));
-//            } catch (err) {
-//                return Promise.reject("User by id " + id + " not found!");
-//            }
-//        },
-
-    });
-
-    // var Adapter = exports.App.UserAdapter = DS.Adapter.extend({
-    //     // ...your code here
-    // });
 
     return User;
 

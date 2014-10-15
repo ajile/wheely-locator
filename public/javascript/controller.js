@@ -9,16 +9,11 @@ App.ApplicationController = Ember.Controller.extend({
  */
 App.MapsController = Ember.ArrayController.extend({
 
-    markers: [
-        Ember.Object.create({latitude: "40.7142700", longitude: "-74.0059700"}),
-        Ember.Object.create({latitude: "41.7142700", longitude: "-74.0059700"}),
-    ],
+    /** @member {App.CoordsCollection} Координаты */
+    coords: Ember.computed.alias('coords'),
 
     init: function() {
 
-        Ember.Logger.debug("App.MapsController: Моделька.", this.get('model'));
-
-        // console.log(this.get('model'))
     }
 
 });

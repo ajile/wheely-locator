@@ -2,7 +2,10 @@
 
 ТЗ здесь: https://docs.google.com/document/d/1KIK4OkFjJ7i2lUGPwM-Yl8-NEJuIevm8NtkNz5xD6B8/edit
 
-Команды для запуска:
+## Установка
+
+Клонируем себе: `git clone git@github.com:ajile/wheely-locator.git`. 
+Переходим в созданную директорию `cd wheely-locator`.
 
 Подтягиваем зависимости ноды:
 ```
@@ -35,23 +38,17 @@ npm install && bower install && grunt build && grunt connect
 ```
 
 
-# Пытаюсь разобраться
+## Проблемы и способы их решения
 
-http://emberjs.com/guides/routing/defining-your-routes/#toc_initial-routes
-1. Нужно создать базовый класс Контроллера, который будет содержать информацию о пользователе
+1. Объект `App.ConnectionProxy` не может определить причину обрыва соединения, то ли пользователь не подошел, то ли сервер просто недоступен. HTTP статусы средствами WebSocket проверить нет возможности.
 
 
-2. Нужно создать простенький ACL
+## Краткий todo
 
-http://emberjs.com/guides/routing/defining-your-routes/#toc_initial-routes
-3. Нужно создать Роутер, который будет смотреть в ACL и перебразывать пользователя на экран авторизации если он не залогинен
+1. Закончить комментировать код (JSDoc)
 
-4. Создать адаптер и стратегию отвечающие за получение данных по HTTP или прямо из Storage (http://www.html5rocks.com/en/tutorials/offline/storage/?redirect_from_locale=ru или http://diveintohtml5.info/storage.html). Проверить поддержку браузеров. Согласовать поддержку браузеров для WebSocket, Location, Storage. Свести в таблицу требований к браузерам.
+2. Вытащить все из App в ApplicationController
 
-5. Декомпозировать библиотеку на публичные репы - влияет на карму :)
+3. Организовать код в соотв. с http://www.ember-cli.com/
 
-6. Привести комментарии к модулям, неймспейсам, классам, функциям, переменным, методам и т.п. в соотв. с DocComment
-
-7. Реализовать коллекцию точек координат по принципу FIFO (First In, First Out)
-
-8. Нашел статью: http://discuss.emberjs.com/t/services-a-rumination-on-introducing-a-new-role-into-the-ember-programming-model/4947 - можно внедрить такой подход, а то размер инициалайзеров уже устрашающий - они превратились в спагети-код.
+4. Начать слушаться событий online и offline

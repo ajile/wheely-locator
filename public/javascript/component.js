@@ -25,6 +25,10 @@
      */
     var GoogleMapsComponent = exports.App.GoogleMapsComponent = Ember.Component.extend({
 
+        map: null,
+
+        markers: {},
+
         coordinatesChanged: function() {
 
             var map = this.get('map'),
@@ -36,19 +40,34 @@
 
         }.observes('latitude', 'longitude'),
 
-        setMarkers: function() {
+        setCoords: function() {
+
             var map = this.get('map'),
+                coords = this.get('coords'),
                 markers = this.get('markers');
 
-            markers.forEach(function(marker){
-                new google.maps.Marker({
-                    position: new google.maps.LatLng(marker.get('latitude'), marker.get('longitude')),
-                    map: map
-                });
+            coords.forEach(function(coord){
+                var id = coord['id'],
+                    position = new google.maps.LatLng(coord['lat'], coord['lon']);
+                if (markers[id]) {
+                    // Move
+                    markers[id].setPosition(position);
+                } else {
+                    // Create
+                    markers[id] = new google.maps.Marker({
+                        position: position,
+                        map: map,
+                        icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld='+id+'|FF0000|000000'
+                    });
+                }
             }, this);
-        }.observes('markers.@each.latitude', 'markers.@each.longitude'),
+
+            // this.set('markers', markers);
+
+        }.observes('coords.@each.id'),
 
         insertMap: function() {
+
             var container = this.$(".map-canvas");
 
             var options = {
@@ -58,9 +77,12 @@
                 disableDefaultUI: true
             };
 
-            this.set('map', new google.maps.Map(container[0], options));
+            var map = this.get('map');
 
-            this.setMarkers();
+            map || this.set('map', new google.maps.Map(container[0], options));
+            this.set('markers', {});
+
+            this.setCoords();
 
         }.on('didInsertElement')
     });

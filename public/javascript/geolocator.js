@@ -31,12 +31,6 @@
 
         positionPrev: null,
 
-        init: function() {
-            this.on('position', function() {
-                console.log(arguments);
-            });
-        },
-
         hash: function(position) {
             var coords = position.coords,
                 hash = [coords.latitude, coords.longitude].join('');
@@ -52,8 +46,6 @@
 
             var oldPosition = this.get('positionPrev');
             var oldHash = oldPosition ? this.hash(oldPosition) : null;
-
-            // console.log(oldHash, newHash);
 
             if (oldHash !== newHash) {
                 this.set('positionPrev', newPosition);
@@ -104,7 +96,7 @@
         },
 
         reset: function() {
-            Ember.Logger.debug("GeoLocator: Обнуляем позицию.");
+            Ember.Logger.debug("GeoLocator: Очищаем предыдущий результат.");
             this.set('positionPrev', null);
             this.trigger('reset', this);
             return this;

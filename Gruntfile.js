@@ -10,7 +10,7 @@ module.exports = function(grunt) {
                 options: {
                     keepalive: true,
                     port: 3000,
-                    hostname: "192.168.0.107",
+                    // hostname: "192.168.0.107",
                     base: './'
                 }
             }

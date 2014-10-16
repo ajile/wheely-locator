@@ -1,6 +1,6 @@
-# Тестовое задание для Wheely
+# Приложение для Wheely
 
-ТЗ здесь: https://docs.google.com/document/d/1KIK4OkFjJ7i2lUGPwM-Yl8-NEJuIevm8NtkNz5xD6B8/edit
+Описание тестового задания находится по [ссылке](https://docs.google.com/document/d/1KIK4OkFjJ7i2lUGPwM-Yl8-NEJuIevm8NtkNz5xD6B8/edit).
 
 ![Screenshot](http://dl1.joxi.net/drive/0005/0189/340157/141016/e433781e49.jpg)
 

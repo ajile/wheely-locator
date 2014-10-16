@@ -2,6 +2,8 @@
 
 ТЗ здесь: https://docs.google.com/document/d/1KIK4OkFjJ7i2lUGPwM-Yl8-NEJuIevm8NtkNz5xD6B8/edit
 
+![Screenshot](http://dl1.joxi.net/drive/0005/0189/340157/141016/e433781e49.jpg)
+
 ## Установка
 
 Клонируем себе: `git clone git@github.com:ajile/wheely-locator.git`. 
@@ -45,9 +47,9 @@ npm install && bower install && grunt build && grunt connect
 
 ## Краткий todo
 
-1. Закончить комментировать код (JSDoc)
+1. Вытащить все из App в ApplicationController
 
-2. Вытащить все из App в ApplicationController
+2. Закончить комментировать код (JSDoc)
 
 3. Организовать код в соотв. с http://www.ember-cli.com/
 

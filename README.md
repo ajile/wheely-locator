@@ -24,11 +24,6 @@ bower install
 grunt build
 ```
 
-Если нужна документация:
-```
-grunt jsdoc
-```
-
 Запускаем сервер:
 ```
 grunt connect
@@ -38,6 +33,8 @@ grunt connect
 ```
 npm install && bower install && grunt build && grunt connect
 ```
+
+Сервис станет доступен по адресу: `127.0.0.1:3000`.
 
 
 ## Проблемы и способы их решения

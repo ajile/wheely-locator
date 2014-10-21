@@ -38,12 +38,8 @@
         socket: null,
 
         isConnected: function() {
-            if (this.get('socket') === null) {
-                return false;
-            } else {
-                return this.get('socket') instanceof WebSocket &&
-                       this.get('socket').readyState === WebSocket.OPEN;
-            }
+            var s = this.get('socket');
+            return s !== null && s instanceof WebSocket && s.readyState === WebSocket.OPEN;
         }.property('socket'),
 
         /**
@@ -62,7 +58,7 @@
                 params = Ember.$.param(data),
 
                 // Собранный урл
-                url = [this.get('socketURL'), '?', params].join('');
+                url = [this.get('socketURL'), params].join('?');
 
             return new Promise(Ember.$.proxy(function(resolve, reject) {
 

@@ -1,4 +1,4 @@
-# Приложение для Wheely
+# Приложение для Wheely [![Build Status](https://secure.travis-ci.org/ajile/wheely-locator.svg)](http://travis-ci.org/ajile/wheely-locator)
 
 Описание тестового задания находится по [ссылке](https://docs.google.com/document/d/1KIK4OkFjJ7i2lUGPwM-Yl8-NEJuIevm8NtkNz5xD6B8/edit).
 

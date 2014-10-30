@@ -6,7 +6,7 @@
 
 ## Установка
 
-Клонируем себе: `git clone git@github.com:ajile/wheely-locator.git`. 
+Клонируем себе: `git clone git@github.com:ajile/wheely-locator.git`.
 Переходим в созданную директорию `cd wheely-locator`.
 
 Подтягиваем зависимости ноды:
@@ -51,3 +51,4 @@ npm install && bower install && grunt build && grunt connect
 3. Организовать код в соотв. с http://www.ember-cli.com/
 
 4. Начать слушаться событий online и offline
+
